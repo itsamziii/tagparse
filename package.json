@@ -2,6 +2,7 @@
     "name": "tagparse",
     "description": "A way to parse tags.",
     "version": "0.0.1",
+    "private": false,
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
     "tyoes": "./dist/index.d.ts",
@@ -11,12 +12,18 @@
         "format": "prettier --write .",
         "test": "vitest run",
         "dev": "vitest",
-        "ci": "npm run lint && npm run test && npm run build"
+        "ci": "npm run lint && npm run test && npm run build",
+        "release": "npm run ci && changeset publish"
     },
-    "keywords": [],
+    "keywords": [
+        "parser",
+        "tags",
+        "templating"
+    ],
     "author": "ItsAmziii",
     "license": "MIT",
     "devDependencies": {
+        "@changesets/cli": "^2.27.9",
         "@types/node": "^22.8.2",
         "eslint-config-neon": "^0.2.0",
         "prettier": "^3.3.3",
