@@ -1,7 +1,12 @@
-src/
-test/
-node_modules/
+src
+test
+
+.github
+.changeset
+.prettierrc
+.prettierignore
 
 tsconfig.json
 tsup.config.ts
+eslint.config.js
 
