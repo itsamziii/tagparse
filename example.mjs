@@ -1,5 +1,10 @@
-import { Parser, NodeType } from "./dist/index.mjs";
+import { Parser } from "./dist/index.mjs";
 
-const input = "Hello, {name}! Your order #{orderId} is confirmed.";
+(async () => {
+    const input = "Hello, {world}!";
+    const parser = new Parser(input);
 
+    const res = await parser.parse();
 
+    console.dir(res, { depth: null });
+})();
