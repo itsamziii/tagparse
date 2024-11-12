@@ -25,10 +25,10 @@ export class Parser {
 
     /**
      * Strict mode rules:
-     * - No empty tags allowed, i.e. "{}" will throw an error
-     * - No spaces within function tag names or variable tags i.e. "{ pick:}" " "{pi ck:}" "{pick :}" "{test . var}" will all throw errors
+     * - No empty tags allowed, i.e. "\{\}" will throw an error
+     * - No spaces within function tag names or variable tags i.e. "\{ pick:\}" " "\{pi ck:\}" "\{pick :\}" "\{test . var\}" will all throw errors
      * - All tags are expected to end, reaching end of input before the end of tag will throw an error
-     * - All tags should start with tagStart , i.e. "{" by default, and end with "}" by default.
+     * - All tags should start with tagStart , i.e. "\{" by default, and end with "\}" by default.
      * - You are expected to supply atleast one argument to function tags, strict mode prevents you from supplying function tags without any arguments.
      */
     private readonly strict: boolean = false;
@@ -102,7 +102,7 @@ export class Parser {
     }
 
     private async parseTag(): Promise<Node> {
-        let nameToken, nextToken;
+        let nameToken; let nextToken;
 
         if (this.strict) {
             nameToken = await this.nextToken();
@@ -152,14 +152,12 @@ export class Parser {
 
             case TokenType.Colon: {
                 const args = await this.parseFunctionArguments();
-                if (args.length === 0) {
-                    if (this.strict) {
+                if (args.length === 0 && this.strict) {
                         throw new StrictModeError(
                             "Expected at least one argument for the tag payload.",
                         );
                     }
                     // Honestly idk what to do here, so I'm just gonna let the function node have no args
-                }
 
                 return this.parseTags
                     ? // We can safely assert that `this.functionParser` is defined if `this.parseTags` is true
@@ -213,7 +211,7 @@ export class Parser {
 
         while (true) {
             const token = await this.nextToken();
-            let escaped = buffer.length && buffer.at(-1) === "\\";
+            const escaped = buffer.length && buffer.at(-1) === "\\";
 
             if (token.type === TokenType.Pipe) {
                 if (escaped) {
@@ -227,6 +225,7 @@ export class Parser {
                     buffer = buffer.slice(0, -1) + token.value;
                     continue;
                 }
+
                 this.stack.push(token);
                 break;
             } else if (token.type === TokenType.TagStart) {

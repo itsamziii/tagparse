@@ -1,16 +1,18 @@
 import { describe, it, expect, vi } from "vitest";
-import { ArgumentNode, NodeType, Parser } from "../src/index.js";
+import type { ArgumentNode } from "../src/index.js";
+import { NodeType, Parser } from "../src/index.js";
 
 describe("Parser class with parseTags set to true", () => {
     const functionParser = vi
         .fn()
-        .mockImplementation((name: string, args: ArgumentNode[]) => {
-            return `Parsed ${name} function with ${args.length} arguments: ${args.map((arg) => arg.finalValue).join(", ")}`;
-        });
+        .mockImplementation(
+            (name: string, args: ArgumentNode[]) =>
+                `Parsed ${name} function with ${args.length} arguments: ${args.map((arg) => arg.finalValue).join(", ")}`,
+        );
 
-    const variableParser = vi.fn().mockImplementation((name: string) => {
-        return `Parsed ${name} variable`;
-    });
+    const variableParser = vi
+        .fn()
+        .mockImplementation((name: string) => `Parsed ${name} variable`);
 
     it("should parse a variable tag", async () => {
         const input = "{hello}";

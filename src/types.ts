@@ -44,9 +44,9 @@ export const enum NodeType {
 }
 
 export type ArgumentNode = {
+    finalValue?: string;
     nodes: Node[];
     type: NodeType.Argument;
-    finalValue?: string;
 };
 
 export type FunctionNode = {
