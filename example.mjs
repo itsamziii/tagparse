@@ -1,4 +1,4 @@
-import { Parser } from "./dist/index.mjs";
+import { Parser } from "tagparse";
 
 (async () => {
     const input = "Hello, {world}!";

@@ -1,13 +1,17 @@
 {
     "name": "tagparse",
-    "description": "A way to parse tags",
+    "description": "A way to parse tags.",
     "version": "0.0.1",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
     "tyoes": "./dist/index.d.ts",
     "scripts": {
         "build": "tsup",
-        "test": "vitest run"
+        "lint": "eslint . --ext .ts",
+        "format": "prettier --write .",
+        "test": "vitest run",
+        "dev": "vitest",
+        "ci": "npm run lint && npm run test && npm run build"
     },
     "keywords": [],
     "author": "ItsAmziii",
