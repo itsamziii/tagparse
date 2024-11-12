@@ -1,4 +1,4 @@
-import { common, node, typescript, prettier } from "eslint-config-neon";
+const { common, node, typescript, prettier } = require("eslint-config-neon");
 /**
  * @type {import('@typescript-eslint/utils').TSESLint.FlatConfig.ConfigArray}
  */
@@ -20,4 +20,4 @@ const config = [
     ...prettier,
 ];
 
-export default config;
+module.exports = config;
