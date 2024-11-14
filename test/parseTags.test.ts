@@ -64,6 +64,34 @@ describe("Parser class with parseTags set to true", () => {
         ]);
     });
 
+    it("should parse a function tag with escaped special characters", async () => {
+        const input = "{say:hello \\{user\\}.}";
+        const parser = new Parser(input, {
+            strict: true,
+            functionParser,
+            variableParser,
+            parseTags: true,
+        });
+        const result = await parser.parse();
+
+        expect(result).toEqual([
+            {
+                type: NodeType.Function,
+                name: "say",
+                value: "Parsed say function with 1 arguments: hello {user}.",
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "hello {user}.",
+                        nodes: [
+                            { type: NodeType.Text, value: "hello {user}." },
+                        ],
+                    },
+                ],
+            },
+        ]);
+    });
+
     it("should parse both function and variable tags", async () => {
         const input = "{add:1|2}{hello}";
         const parser = new Parser(input, {
