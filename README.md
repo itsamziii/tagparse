@@ -1,5 +1,11 @@
 # 🏷️ tagparse
 
+<p align="center">
+    <img src="https://i.imgur.com/lAYtRnG.png">
+</p>
+
+> Only suppports ESM
+
 **tagparse** is a high-performance, stream-based lexer and parser library for Node.js, designed to handle asynchronous, memory-efficient parsing of custom tag-based syntax. It’s ideal for high-concurrency applications and real-time data processing where non-blocking, scalable parsing is essential.
 
 > **Use Case:** Quickly parse and process custom tags (e.g., `{variable}`, `{function:arg1|arg2}`) for templating engines, dashboards, and real-time applications.
