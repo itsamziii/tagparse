@@ -1,5 +1,6 @@
-import { defineConfig, type Options } from "tsup";
 import { relative, resolve } from "node:path";
+import process from "node:process";
+import { defineConfig, type Options } from "tsup";
 
 const baseOptions: Options = {
     dts: true,

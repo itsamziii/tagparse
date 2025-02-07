@@ -133,6 +133,7 @@ export class Parser {
 
         const name = nameToken.value;
 
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (nextToken.type) {
             case TokenType.TagEnd: {
                 if (name === "") {
