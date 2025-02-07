@@ -4,7 +4,6 @@
     <img src="https://i.imgur.com/lAYtRnG.png">
 </p>
 
-> Only suppports ESM
 
 **tagparse** is a high-performance, stream-based lexer and parser library for Node.js, designed to handle asynchronous, memory-efficient parsing of custom tag-based syntax. It’s ideal for high-concurrency applications and real-time data processing where non-blocking, scalable parsing is essential.
 
