@@ -25,7 +25,7 @@ export class Stream extends Readable {
             if (!chunk) {
                 return false;
             }
-            
+
             this.buffer.push(...chunk);
         }
 

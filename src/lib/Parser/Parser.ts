@@ -102,7 +102,8 @@ export class Parser {
     }
 
     private async parseTag(): Promise<Node> {
-        let nameToken; let nextToken;
+        let nameToken;
+        let nextToken;
 
         if (this.strict) {
             nameToken = await this.nextToken();
@@ -153,11 +154,11 @@ export class Parser {
             case TokenType.Colon: {
                 const args = await this.parseFunctionArguments();
                 if (args.length === 0 && this.strict) {
-                        throw new StrictModeError(
-                            "Expected at least one argument for the tag payload.",
-                        );
-                    }
-                    // Honestly idk what to do here, so I'm just gonna let the function node have no args
+                    throw new StrictModeError(
+                        "Expected at least one argument for the tag payload.",
+                    );
+                }
+                // Honestly idk what to do here, so I'm just gonna let the function node have no args
 
                 return this.parseTags
                     ? // We can safely assert that `this.functionParser` is defined if `this.parseTags` is true
