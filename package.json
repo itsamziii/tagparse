@@ -22,8 +22,8 @@
         "format": "prettier --write .",
         "test": "vitest run",
         "dev": "vitest",
-        "ci": "npm run lint && npm run test && npm run build",
-        "release": "npm run ci && changeset publish"
+        "ci": "pnpm run lint && pnpm run test && pnpm run build",
+        "release": "pnpm run ci && changeset publish"
     },
     "keywords": [
         "parser",
@@ -45,5 +45,6 @@
         "type": "git",
         "url": "git+https://github.com/itsamziii/tagparse.git"
     },
-    "homepage": "https://github.com/itsamziii/tagparse#readme"
+    "homepage": "https://github.com/itsamziii/tagparse#readme",
+    "packageManager": "pnpm@10.26.2+sha512.0e308ff2005fc7410366f154f625f6631ab2b16b1d2e70238444dd6ae9d630a8482d92a451144debc492416896ed16f7b114a86ec68b8404b2443869e68ffda6"
 }

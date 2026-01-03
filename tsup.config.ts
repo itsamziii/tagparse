@@ -9,7 +9,7 @@ const baseOptions: Options = {
     clean: true,
     sourcemap: true,
     entry: ["./src/index.ts"],
-    target: "es2020",
+    target: "es2022",
     minify: false,
     tsconfig: relative(__dirname, resolve(process.cwd(), "tsconfig.json")),
     keepNames: true,
