@@ -10,10 +10,7 @@ export function mergeAdjacentTextNodes(nodes: Node[]): Node[] {
     for (const node of nodes) {
         const lastNode = result.at(-1);
 
-        if (
-            node.type === NodeType.Text &&
-            lastNode?.type === NodeType.Text
-        ) {
+        if (node.type === NodeType.Text && lastNode?.type === NodeType.Text) {
             // Merge with previous text node
             (lastNode as TextNode).value += (node as TextNode).value;
         } else {
@@ -36,6 +33,7 @@ export const removeEmptyText: Transformer = createTransformer(
                 return null; // Remove
             }
         }
+
         return node;
     },
 );
@@ -52,6 +50,7 @@ export const removeWhitespaceText: Transformer = createTransformer(
                 return null; // Remove
             }
         }
+
         return node;
     },
 );
@@ -69,6 +68,7 @@ export const trimTextNodes: Transformer = createTransformer(
                 value: textNode.value.trim(),
             };
         }
+
         return node;
     },
 );
@@ -83,9 +83,10 @@ export const normalizeWhitespace: Transformer = createTransformer(
             const textNode = node as TextNode;
             return {
                 ...textNode,
-                value: textNode.value.replace(/\s+/g, " "),
+                value: textNode.value.replaceAll(/\s+/g, " "),
             };
         }
+
         return node;
     },
 );
@@ -106,6 +107,7 @@ export function createVariableResolver(
                 } as TextNode;
             }
         }
+
         return node;
     });
 }
@@ -115,16 +117,12 @@ export function createVariableResolver(
  */
 export function filterByType(...types: string[]): Transformer {
     const typeSet = new Set(types);
-    return createTransformer("filterByType", (node) => {
-        return typeSet.has(node.type) ? node : null;
-    });
+    return createTransformer("filterByType", (node) => typeSet.has(node.type) ? node : null);
 }
 
 /**
  * Map node values using a mapper function
  */
-export function mapNodes(
-    mapper: (node: Node) => Node | null,
-): Transformer {
+export function mapNodes(mapper: (node: Node) => Node | null): Transformer {
     return createTransformer("mapNodes", mapper);
 }

@@ -90,6 +90,7 @@ export class Lexer {
                     if (this.buffer.length === 0) {
                         this.bufferStartPosition = position;
                     }
+
                     this.buffer += char;
                 }
             }
@@ -117,6 +118,7 @@ export class Lexer {
                 if (this.buffer.length === 0) {
                     this.bufferStartPosition = position;
                 }
+
                 this.buffer += char;
             }
         } else {
@@ -147,6 +149,7 @@ export class Lexer {
                 if (this.buffer.length === 0) {
                     this.bufferStartPosition = position;
                 }
+
                 this.buffer += char;
             }
         } else {

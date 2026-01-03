@@ -169,8 +169,16 @@ describe("Parser class with evaluateTags set to true", () => {
                 name: "add",
                 value: "Parsed add function with 2 arguments: 1, 2",
                 args: [
-                    { type: NodeType.Argument, finalValue: "1", nodes: [{ type: NodeType.Text, value: "1" }] },
-                    { type: NodeType.Argument, finalValue: "2", nodes: [{ type: NodeType.Text, value: "2" }] },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "1",
+                        nodes: [{ type: NodeType.Text, value: "1" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "2",
+                        nodes: [{ type: NodeType.Text, value: "2" }],
+                    },
                 ],
             },
             {
@@ -178,8 +186,16 @@ describe("Parser class with evaluateTags set to true", () => {
                 name: "multiply",
                 value: "Parsed multiply function with 2 arguments: 3, 4",
                 args: [
-                    { type: NodeType.Argument, finalValue: "3", nodes: [{ type: NodeType.Text, value: "3" }] },
-                    { type: NodeType.Argument, finalValue: "4", nodes: [{ type: NodeType.Text, value: "4" }] },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "3",
+                        nodes: [{ type: NodeType.Text, value: "3" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "4",
+                        nodes: [{ type: NodeType.Text, value: "4" }],
+                    },
                 ],
             },
         ]);
@@ -190,9 +206,17 @@ describe("Parser class with evaluateTags set to true", () => {
         const result = globalParser.parse(input);
 
         expect(result).toEqual([
-            { type: NodeType.Variable, raw: "user", value: "Parsed user variable" },
+            {
+                type: NodeType.Variable,
+                raw: "user",
+                value: "Parsed user variable",
+            },
             { type: NodeType.Text, value: " said hello to " },
-            { type: NodeType.Variable, raw: "user", value: "Parsed user variable" },
+            {
+                type: NodeType.Variable,
+                raw: "user",
+                value: "Parsed user variable",
+            },
         ]);
     });
 
@@ -208,11 +232,20 @@ describe("Parser class with evaluateTags set to true", () => {
                 args: [
                     {
                         type: NodeType.Argument,
-                        finalValue: "Parsed greeting variable Parsed name variable!",
+                        finalValue:
+                            "Parsed greeting variable Parsed name variable!",
                         nodes: [
-                            { type: NodeType.Variable, raw: "greeting", value: "Parsed greeting variable" },
+                            {
+                                type: NodeType.Variable,
+                                raw: "greeting",
+                                value: "Parsed greeting variable",
+                            },
                             { type: NodeType.Text, value: " " },
-                            { type: NodeType.Variable, raw: "name", value: "Parsed name variable" },
+                            {
+                                type: NodeType.Variable,
+                                raw: "name",
+                                value: "Parsed name variable",
+                            },
                             { type: NodeType.Text, value: "!" },
                         ],
                     },
@@ -234,12 +267,24 @@ describe("Parser class with evaluateTags set to true", () => {
                     {
                         type: NodeType.Argument,
                         finalValue: "Parsed a variable",
-                        nodes: [{ type: NodeType.Variable, raw: "a", value: "Parsed a variable" }],
+                        nodes: [
+                            {
+                                type: NodeType.Variable,
+                                raw: "a",
+                                value: "Parsed a variable",
+                            },
+                        ],
                     },
                     {
                         type: NodeType.Argument,
                         finalValue: "Parsed b variable",
-                        nodes: [{ type: NodeType.Variable, raw: "b", value: "Parsed b variable" }],
+                        nodes: [
+                            {
+                                type: NodeType.Variable,
+                                raw: "b",
+                                value: "Parsed b variable",
+                            },
+                        ],
                     },
                 ],
             },
@@ -247,18 +292,35 @@ describe("Parser class with evaluateTags set to true", () => {
     });
 
     it("should parse complex template with mixed content", () => {
-        const input = "Welcome {user}! Your order #{orderId} for {product} is {status}.";
+        const input =
+            "Welcome {user}! Your order #{orderId} for {product} is {status}.";
         const result = globalParser.parse(input);
 
         expect(result).toEqual([
             { type: NodeType.Text, value: "Welcome " },
-            { type: NodeType.Variable, raw: "user", value: "Parsed user variable" },
+            {
+                type: NodeType.Variable,
+                raw: "user",
+                value: "Parsed user variable",
+            },
             { type: NodeType.Text, value: "! Your order #" },
-            { type: NodeType.Variable, raw: "orderId", value: "Parsed orderId variable" },
+            {
+                type: NodeType.Variable,
+                raw: "orderId",
+                value: "Parsed orderId variable",
+            },
             { type: NodeType.Text, value: " for " },
-            { type: NodeType.Variable, raw: "product", value: "Parsed product variable" },
+            {
+                type: NodeType.Variable,
+                raw: "product",
+                value: "Parsed product variable",
+            },
             { type: NodeType.Text, value: " is " },
-            { type: NodeType.Variable, raw: "status", value: "Parsed status variable" },
+            {
+                type: NodeType.Variable,
+                raw: "status",
+                value: "Parsed status variable",
+            },
             { type: NodeType.Text, value: "." },
         ]);
     });
@@ -281,7 +343,9 @@ describe("Parser class with evaluateTags set to true", () => {
     });
 
     it("should handle function parser returning complex values", () => {
-        const complexFunctionParser = vi.fn().mockReturnValue({ computed: true, result: 42 });
+        const complexFunctionParser = vi
+            .fn()
+            .mockReturnValue({ computed: true, result: 42 });
         const parser = new Parser({
             strict: true,
             functionParser: complexFunctionParser,
@@ -297,7 +361,13 @@ describe("Parser class with evaluateTags set to true", () => {
                 type: NodeType.Function,
                 name: "compute",
                 value: { computed: true, result: 42 },
-                args: [{ type: NodeType.Argument, finalValue: "x", nodes: [{ type: NodeType.Text, value: "x" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "x",
+                        nodes: [{ type: NodeType.Text, value: "x" }],
+                    },
+                ],
             },
         ]);
     });
@@ -312,13 +382,41 @@ describe("Parser class with evaluateTags set to true", () => {
                 name: "join",
                 value: "Parsed join function with 7 arguments: a, b, c, d, e, f, g",
                 args: [
-                    { type: NodeType.Argument, finalValue: "a", nodes: [{ type: NodeType.Text, value: "a" }] },
-                    { type: NodeType.Argument, finalValue: "b", nodes: [{ type: NodeType.Text, value: "b" }] },
-                    { type: NodeType.Argument, finalValue: "c", nodes: [{ type: NodeType.Text, value: "c" }] },
-                    { type: NodeType.Argument, finalValue: "d", nodes: [{ type: NodeType.Text, value: "d" }] },
-                    { type: NodeType.Argument, finalValue: "e", nodes: [{ type: NodeType.Text, value: "e" }] },
-                    { type: NodeType.Argument, finalValue: "f", nodes: [{ type: NodeType.Text, value: "f" }] },
-                    { type: NodeType.Argument, finalValue: "g", nodes: [{ type: NodeType.Text, value: "g" }] },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "a",
+                        nodes: [{ type: NodeType.Text, value: "a" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "b",
+                        nodes: [{ type: NodeType.Text, value: "b" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "c",
+                        nodes: [{ type: NodeType.Text, value: "c" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "d",
+                        nodes: [{ type: NodeType.Text, value: "d" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "e",
+                        nodes: [{ type: NodeType.Text, value: "e" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "f",
+                        nodes: [{ type: NodeType.Text, value: "f" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        finalValue: "g",
+                        nodes: [{ type: NodeType.Text, value: "g" }],
+                    },
                 ],
             },
         ]);
@@ -330,7 +428,11 @@ describe("Parser class with evaluateTags set to true", () => {
 
         expect(result).toEqual([
             { type: NodeType.Text, value: "Line 1\n" },
-            { type: NodeType.Variable, raw: "var", value: "Parsed var variable" },
+            {
+                type: NodeType.Variable,
+                raw: "var",
+                value: "Parsed var variable",
+            },
             { type: NodeType.Text, value: "\tLine 2" },
         ]);
     });

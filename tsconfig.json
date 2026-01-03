@@ -13,5 +13,5 @@
         "noUncheckedIndexedAccess": true,
         "noEmit": true
     },
-    "exclude":["dist", "node_modules", "*.{js,mjs}", "**.test.**"],
+    "exclude": ["dist", "node_modules", "*.{js,mjs}", "**.test.**"]
 }

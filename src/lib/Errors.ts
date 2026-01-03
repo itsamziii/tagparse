@@ -1,12 +1,18 @@
 /**
  * Position information for error reporting
  */
-export interface Position {
-    /** Line number (1-based) */
-    line: number;
-    /** Column number (1-based) */
+export type Position = {
+    /**
+     * Column number (1-based)
+     */
     column: number;
-    /** Character offset from start (0-based) */
+    /**
+     * Line number (1-based)
+     */
+    line: number;
+    /**
+     * Character offset from start (0-based)
+     */
     offset: number;
 }
 

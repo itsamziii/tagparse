@@ -53,7 +53,9 @@ describe("Parser class with strict mode off", () => {
         const input = "{tag:arg1|arg2";
         const result = globalParser.parse(input);
 
-        expect(result).toEqual([{ type: NodeType.Text, value: "{tag:arg1|arg2" }]);
+        expect(result).toEqual([
+            { type: NodeType.Text, value: "{tag:arg1|arg2" },
+        ]);
     });
 
     it("should allow parsing multiple times with fresh state", () => {
@@ -70,7 +72,9 @@ describe("Parser class with strict mode off", () => {
         const input = "just plain text here";
         const result = globalParser.parse(input);
 
-        expect(result).toEqual([{ type: NodeType.Text, value: "just plain text here" }]);
+        expect(result).toEqual([
+            { type: NodeType.Text, value: "just plain text here" },
+        ]);
     });
 
     it("should handle empty input", () => {
@@ -85,7 +89,9 @@ describe("Parser class with strict mode off", () => {
         const result = globalParser.parse(input);
 
         // Spaces within unclosed tags are consumed by the parser
-        expect(result).toEqual([{ type: NodeType.Text, value: "{first{second {third" }]);
+        expect(result).toEqual([
+            { type: NodeType.Text, value: "{first{second {third" },
+        ]);
     });
 
     it("should handle mixed valid and invalid tags", () => {
@@ -102,7 +108,9 @@ describe("Parser class with strict mode off", () => {
         const input = "text } more } text";
         const result = globalParser.parse(input);
 
-        expect(result).toEqual([{ type: NodeType.Text, value: "text } more } text" }]);
+        expect(result).toEqual([
+            { type: NodeType.Text, value: "text } more } text" },
+        ]);
     });
 
     it("should handle double braces as text", () => {
@@ -120,7 +128,14 @@ describe("Parser class with strict mode off", () => {
             {
                 type: NodeType.Function,
                 name: "func",
-                args: [{ type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "arg with spaces" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        nodes: [
+                            { type: NodeType.Text, value: "arg with spaces" },
+                        ],
+                    },
+                ],
             },
         ]);
     });
@@ -133,7 +148,7 @@ describe("Parser class with strict mode off", () => {
     });
 
     it("should handle very long tag names gracefully", () => {
-        const longName = "a".repeat(1000);
+        const longName = "a".repeat(1_000);
         const input = `{${longName}}`;
         const result = globalParser.parse(input);
 
@@ -176,8 +191,14 @@ describe("Parser class with strict mode off", () => {
                 type: NodeType.Function,
                 name: "func",
                 args: [
-                    { type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "a" }] },
-                    { type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "b" }] },
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "a" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "b" }],
+                    },
                 ],
             },
         ]);

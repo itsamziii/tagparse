@@ -1,6 +1,6 @@
 import type { Position } from "./lib/Errors.js";
 
-export type Awaitable<T> = T | Promise<T>;
+export type Awaitable<T> = Promise<T> | T;
 
 export type LexerOptions = {
     tagEnd?: string;
@@ -11,12 +11,7 @@ export type LexerOptions = {
  * Built-in token types.
  */
 export type BuiltinTokenType =
-    | "TagStart"
-    | "TagEnd"
-    | "Colon"
-    | "Pipe"
-    | "Space"
-    | "Literal";
+    "Colon" | "Literal" | "Pipe" | "Space" | "TagEnd" | "TagStart";
 
 /**
  * Token type - either a built-in type or a custom string type
@@ -36,9 +31,9 @@ export const TokenType = {
 } as const;
 
 export type Token = {
+    position?: Position;
     type: TokenType;
     value: string;
-    position?: Position;
 };
 
 export type ReadonlyToken = Readonly<Token>;
@@ -47,10 +42,6 @@ export type ReadonlyToken = Readonly<Token>;
  * Sync token generator type
  */
 export type TokenGenerator = Generator<ReadonlyToken>;
-
-// ============================================================================
-// Parser Types
-// ============================================================================
 
 /**
  * Function parser callback - sync version (v2)
@@ -70,18 +61,16 @@ export type TFunctionParserAsyncFn = (
  */
 export type TVariableParserFn = (variable: string) => unknown;
 
-export type TVariableParserAsyncFn = (
-    variable: string,
-) => Awaitable<unknown>;
+export type TVariableParserAsyncFn = (variable: string) => Awaitable<unknown>;
 
 export type ParserOptions = {
-    functionParser?: TFunctionParserFn;
-    lexerOptions?: LexerOptions;
     /**
      * When true, calls functionParser/variableParser to evaluate tags.
      * Requires functionParser and variableParser to be provided.
      */
     evaluateTags?: boolean;
+    functionParser?: TFunctionParserFn;
+    lexerOptions?: LexerOptions;
     /**
      * @deprecated Use `evaluateTags` instead
      */
@@ -97,10 +86,6 @@ export type ParserAsyncOptions = Omit<
     functionParser?: TFunctionParserAsyncFn;
     variableParser?: TVariableParserAsyncFn;
 };
-
-// ============================================================================
-// Node Types
-// ============================================================================
 
 /**
  * Built-in node types.
@@ -151,11 +136,3 @@ export type VariableNode = {
  * Custom nodes should extend this pattern.
  */
 export type Node = ArgumentNode | FunctionNode | TextNode | VariableNode;
-
-/**
- * Custom node type for extensibility
- */
-export interface CustomNode {
-    type: string;
-    [key: string]: unknown;
-}

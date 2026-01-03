@@ -30,10 +30,10 @@ export class Parser {
 
     /**
      * Strict mode rules:
-     * - No empty tags allowed, i.e. "{}" will throw an error
+     * - No empty tags allowed, i.e. "\{\}" will throw an error
      * - No spaces within function tag names or variable tags
      * - All tags are expected to end, reaching end of input before the end of tag will throw an error
-     * - All tags should start with tagStart, i.e. "{" by default, and end with "}" by default.
+     * - All tags should start with tagStart (default "\{") and end with "\}"
      * - You are expected to supply at least one argument to function tags
      */
     private readonly strict: boolean = false;
@@ -157,6 +157,7 @@ export class Parser {
 
         const name = nameToken.value;
 
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (nextToken.type) {
             case TokenType.TagEnd: {
                 if (name === "") {
@@ -231,16 +232,22 @@ export class Parser {
 
             if (part.arg) {
                 if (this.evaluateTags) {
-                    part.arg.finalValue = part.arg.nodes.reduce(
-                        (acc, node) => {
-                            // Extract value from node based on its type
-                            if ("value" in node) {
-                                return acc + String(node.value ?? "");
-                            }
+                    part.arg.finalValue = part.arg.nodes.reduce((acc, node) => {
+                        if (!("value" in node)) {
                             return acc;
-                        },
-                        "",
-                    );
+                        }
+
+                        const value = node.value;
+                        if (
+                            typeof value === "string" ||
+                            typeof value === "number" ||
+                            typeof value === "boolean"
+                        ) {
+                            return acc + String(value);
+                        }
+
+                        return acc;
+                    }, "");
                 }
 
                 args.push(part.arg);
@@ -266,9 +273,9 @@ export class Parser {
 
     private parseArgument(): {
         arg: ArgumentNode | null;
-        raw: string;
-        endedWithTagEnd: boolean;
         endedWithEof: boolean;
+        endedWithTagEnd: boolean;
+        raw: string;
     } | null {
         const argNodes: Node[] = [];
         let buffer = "";

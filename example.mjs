@@ -11,7 +11,8 @@ console.dir(nodes, { depth: null });
 const evaluatingParser = new Parser({
     evaluateTags: true,
     variableParser: (name) => `[${name.toUpperCase()}]`,
-    functionParser: (name, args) => `${name}(${args.map(a => a.finalValue).join(", ")})`,
+    functionParser: (name, args) =>
+        `${name}(${args.map((a) => a.finalValue).join(", ")})`,
 });
 
 const evaluated = evaluatingParser.parse("Hello {user}! Result: {calc:1|2|3}");
@@ -20,9 +21,7 @@ console.dir(evaluated, { depth: null });
 
 // Using transformers
 const data = { user: "Alice", balance: "$100" };
-const resolved = transform(nodes, [
-    createVariableResolver(data),
-]);
+const resolved = transform(nodes, [createVariableResolver(data)]);
 
 console.log("\nTransformed nodes:");
 console.dir(resolved, { depth: null });

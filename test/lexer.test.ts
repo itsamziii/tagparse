@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import { Lexer, TokenType } from "../src/index.js";
 
 // Helper to strip position from tokens for easier comparison
-function stripPositions(tokens: Array<{ type: string; value: string; position?: unknown }>) {
+function stripPositions(
+    tokens: { position?: unknown, type: string; value: string; }[],
+) {
     return tokens.map(({ type, value }) => ({ type, value }));
 }
 

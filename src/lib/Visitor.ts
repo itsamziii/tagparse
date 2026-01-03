@@ -10,17 +10,7 @@ import {
 /**
  * Context provided to visitors during traversal
  */
-export interface VisitContext {
-    /**
-     * Parent node (if any)
-     */
-    parent?: Node;
-
-    /**
-     * Index of current node in parent's children
-     */
-    index: number;
-
+export type VisitContext = {
     /**
      * Ancestor nodes from root to parent
      */
@@ -32,45 +22,30 @@ export interface VisitContext {
     depth: number;
 
     /**
-     * Stop traversal of remaining siblings
+     * Index of current node in parent's children
      */
-    stop: () => void;
+    index: number;
+
+    /**
+     * Parent node (if any)
+     */
+    parent?: Node;
 
     /**
      * Skip children of current node
      */
-    skipChildren: () => void;
+    skipChildren(): void;
+
+    /**
+     * Stop traversal of remaining siblings
+     */
+    stop(): void;
 }
 
 /**
  * Visitor interface for traversing AST nodes
  */
-export interface Visitor {
-    /**
-     * Called for Text nodes
-     */
-    visitText?(node: TextNode, context: VisitContext): void;
-
-    /**
-     * Called for Variable nodes
-     */
-    visitVariable?(node: VariableNode, context: VisitContext): void;
-
-    /**
-     * Called for Function nodes
-     */
-    visitFunction?(node: FunctionNode, context: VisitContext): void;
-
-    /**
-     * Called for Argument nodes
-     */
-    visitArgument?(node: ArgumentNode, context: VisitContext): void;
-
-    /**
-     * Called for any node type (fallback)
-     */
-    visit?(node: Node, context: VisitContext): void;
-
+export type Visitor = {
     /**
      * Called when entering a node (before visiting)
      */
@@ -80,14 +55,39 @@ export interface Visitor {
      * Called when leaving a node (after visiting and children)
      */
     leave?(node: Node, context: VisitContext): void;
+
+    /**
+     * Called for any node type (fallback)
+     */
+    visit?(node: Node, context: VisitContext): void;
+
+    /**
+     * Called for Argument nodes
+     */
+    visitArgument?(node: ArgumentNode, context: VisitContext): void;
+
+    /**
+     * Called for Function nodes
+     */
+    visitFunction?(node: FunctionNode, context: VisitContext): void;
+
+    /**
+     * Called for Text nodes
+     */
+    visitText?(node: TextNode, context: VisitContext): void;
+
+    /**
+     * Called for Variable nodes
+     */
+    visitVariable?(node: VariableNode, context: VisitContext): void;
 }
 
 /**
  * Internal state for traversal control
  */
-interface TraversalState {
-    stopped: boolean;
+type TraversalState = {
     skipChildren: boolean;
+    stopped: boolean;
 }
 
 /**
@@ -123,13 +123,13 @@ function walkNodes(
     depth: number,
     state: TraversalState,
 ): void {
-    for (let i = 0; i < nodes.length; i++) {
+    for (const [index, node_] of nodes.entries()) {
         if (state.stopped) break;
 
-        const node = nodes[i]!;
+        const node = node_!;
         state.skipChildren = false;
 
-        const context = createContext(ancestors, i, depth, state);
+        const context = createContext(ancestors, index, depth, state);
 
         // Call enter
         visitor.enter?.(node, context);
@@ -154,13 +154,13 @@ function walkNodesDeep(
     depth: number,
     state: TraversalState,
 ): void {
-    for (let i = 0; i < nodes.length; i++) {
+    for (const [index, node_] of nodes.entries()) {
         if (state.stopped) break;
 
-        const node = nodes[i]!;
+        const node = node_!;
         state.skipChildren = false;
 
-        const context = createContext(ancestors, i, depth, state);
+        const context = createContext(ancestors, index, depth, state);
 
         // Call enter
         visitor.enter?.(node, context);

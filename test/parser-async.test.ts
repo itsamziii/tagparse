@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    escapeForDiscord,
-    escapeHtml,
-    NodeType,
-    ParserAsync,
-} from "../src";
+import { escapeForDiscord, escapeHtml, NodeType, ParserAsync } from "../src";
 
 describe("ParserAsync", () => {
     it("evaluates variables and functions asynchronously", async () => {
@@ -19,6 +14,7 @@ describe("ParserAsync", () => {
                 if (name === "wrap") {
                     return `[${args[0]?.finalValue ?? ""}]`;
                 }
+
                 return "";
             },
         });

@@ -15,9 +15,9 @@ import { Lexer } from "../Lexer.js";
 
 type ParsedArgument = {
     arg: ArgumentNode | null;
-    raw: string;
-    endedWithTagEnd: boolean;
     endedWithEof: boolean;
+    endedWithTagEnd: boolean;
+    raw: string;
 };
 
 /**
@@ -25,33 +25,41 @@ type ParsedArgument = {
  */
 export class ParserAsync {
     private input!: TokenGenerator;
+
     private lexer!: Lexer;
+
     private nodes: Node[] = [];
+
     private stack: ReadonlyToken[] = [];
+
     private reachedEof = false;
+
     private currentPosition: Position = { line: 1, column: 1, offset: 0 };
+
     private readonly evaluateTags: boolean = false;
+
     private readonly strict: boolean = false;
+
     private readonly functionParser: TFunctionParserAsyncFn;
+
     private readonly variableParser: TVariableParserAsyncFn;
+
     private readonly lexerOptions: LexerOptions = {};
 
     public constructor(options?: ParserAsyncOptions) {
-        this.evaluateTags = Boolean(options?.evaluateTags ?? options?.parseTags);
+        this.evaluateTags = Boolean(
+            options?.evaluateTags ?? options?.parseTags,
+        );
         this.strict = Boolean(options?.strict);
         this.lexerOptions = options?.lexerOptions ?? {};
 
         // Provide safe fallbacks so async evaluation is optional.
         this.functionParser =
             options?.functionParser ??
-            (async () => {
-                return "";
-            });
+            (async () => "");
         this.variableParser =
             options?.variableParser ??
-            (async (name: string) => {
-                return name;
-            });
+            (async (name: string) => name);
     }
 
     /**
@@ -142,6 +150,7 @@ export class ParserAsync {
 
         const name = nameToken.value;
 
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (nextToken.type) {
             case TokenType.TagEnd: {
                 if (name === "") {
@@ -168,7 +177,8 @@ export class ParserAsync {
             }
 
             case TokenType.Colon: {
-                const { args, closed, raw } = await this.parseFunctionArguments();
+                const { args, closed, raw } =
+                    await this.parseFunctionArguments();
                 if (!closed) {
                     return {
                         type: NodeType.Text,
@@ -233,6 +243,7 @@ export class ParserAsync {
                         part.arg.nodes,
                     );
                 }
+
                 args.push(part.arg);
             }
 
@@ -270,6 +281,7 @@ export class ParserAsync {
                     buffer = buffer.slice(0, -1) + token.value;
                     continue;
                 }
+
                 break;
             } else if (token.type === TokenType.TagEnd) {
                 raw += token.value;
@@ -354,6 +366,7 @@ export class ParserAsync {
         do {
             token = this.nextToken();
         } while (token.type === omitType);
+
         return token;
     }
 
@@ -365,11 +378,20 @@ export class ParserAsync {
     private async resolveNodesToString(nodes: Node[]): Promise<string> {
         let result = "";
         for (const node of nodes) {
-            if ("value" in node) {
-                const maybeValue = (node as { value?: unknown }).value;
-                result += String(maybeValue ?? "");
+            if (!("value" in node)) {
+                continue;
+            }
+
+            const maybeValue = (node as { value?: unknown }).value;
+            if (
+                typeof maybeValue === "string" ||
+                typeof maybeValue === "number" ||
+                typeof maybeValue === "boolean"
+            ) {
+                result += String(maybeValue);
             }
         }
+
         return result;
     }
 }

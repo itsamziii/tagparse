@@ -107,9 +107,9 @@ Enable strict mode for syntax validation:
 const parser = new Parser({ strict: true });
 
 // These will throw StrictModeError:
-parser.parse("{}");           // Empty tags not allowed
+parser.parse("{}"); // Empty tags not allowed
 parser.parse("{spaced tag}"); // Spaces in tags not allowed
-parser.parse("{unclosed");    // Unclosed tags not allowed
+parser.parse("{unclosed"); // Unclosed tags not allowed
 ```
 
 Errors include position information:
@@ -127,7 +127,12 @@ try {
 Transform the AST after parsing:
 
 ```javascript
-import { Parser, transform, removeEmptyText, createVariableResolver } from "tagparse";
+import {
+    Parser,
+    transform,
+    removeEmptyText,
+    createVariableResolver,
+} from "tagparse";
 
 const parser = new Parser();
 const nodes = parser.parse("Hello {name}!");
@@ -140,6 +145,7 @@ const resolved = transform(nodes, [
 ```
 
 Built-in transformers:
+
 - `removeEmptyText` - Remove empty text nodes
 - `removeWhitespaceText` - Remove whitespace-only text nodes
 - `trimTextNodes` - Trim whitespace from text nodes
@@ -239,14 +245,14 @@ interface TextNode {
 interface VariableNode {
     type: "Variable";
     raw: string;
-    value?: unknown;  // Set when evaluateTags is true
+    value?: unknown; // Set when evaluateTags is true
 }
 
 interface FunctionNode {
     type: "Function";
     name: string;
     args: ArgumentNode[];
-    value?: unknown;  // Set when evaluateTags is true
+    value?: unknown; // Set when evaluateTags is true
 }
 
 interface ArgumentNode {
@@ -263,11 +269,12 @@ import { TagParseError, StrictModeError } from "tagparse";
 
 // Both include position information
 interface Position {
-    line: number;    // 1-based
-    column: number;  // 1-based
-    offset: number;  // 0-based character offset
+    line: number; // 1-based
+    column: number; // 1-based
+    offset: number; // 0-based character offset
 }
 ```
+
 ## License
 
 MIT

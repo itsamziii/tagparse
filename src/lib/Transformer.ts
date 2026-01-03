@@ -1,19 +1,14 @@
-import { NodeType, type ArgumentNode, type FunctionNode, type Node } from "../types.js";
+import {
+    NodeType,
+    type ArgumentNode,
+    type FunctionNode,
+    type Node,
+} from "../types.js";
 
 /**
  * Context provided to transformers during transformation
  */
-export interface TransformContext {
-    /**
-     * Parent node (if any)
-     */
-    parent?: Node;
-
-    /**
-     * Index of current node in parent's children
-     */
-    index: number;
-
+export type TransformContext = {
     /**
      * Ancestor nodes from root to parent
      */
@@ -23,12 +18,22 @@ export interface TransformContext {
      * Depth in the tree (0 = root level)
      */
     depth: number;
+
+    /**
+     * Index of current node in parent's children
+     */
+    index: number;
+
+    /**
+     * Parent node (if any)
+     */
+    parent?: Node;
 }
 
 /**
  * Transformer interface for modifying AST nodes
  */
-export interface Transformer {
+export type Transformer = {
     /**
      * Name of this transformer (for debugging)
      */
@@ -36,6 +41,7 @@ export interface Transformer {
 
     /**
      * Transform a single node.
+     *
      * @param node - The node to transform
      * @param context - Transformation context
      * @returns
@@ -49,6 +55,7 @@ export interface Transformer {
 
 /**
  * Apply transformers to an array of nodes
+ *
  * @param nodes - Input nodes
  * @param transformers - Array of transformers to apply in order
  * @returns Transformed nodes
@@ -74,17 +81,22 @@ function transformNodes(
 ): Node[] {
     const result: Node[] = [];
 
-    for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i]!;
+    for (const [idx, node_] of nodes.entries()) {
+        const node = node_!;
         const context: TransformContext = {
             parent: ancestors.at(-1),
-            index: i,
+            index: idx,
             ancestors: [...ancestors],
             depth,
         };
 
         // First, recursively transform children
-        const transformedNode = transformChildren(node, transformer, ancestors, depth);
+        const transformedNode = transformChildren(
+            node,
+            transformer,
+            ancestors,
+            depth,
+        );
 
         // Then apply the transformer to this node
         const transformed = transformer.transform(transformedNode, context);
@@ -188,10 +200,10 @@ export function composeTransformers(
                 if (Array.isArray(result)) {
                     // Apply transformer to each node in array
                     const newResult: Node[] = [];
-                    for (let i = 0; i < result.length; i++) {
-                        const transformed = transformer.transform(result[i]!, {
+                    for (const [idx, element] of result.entries()) {
+                        const transformed = transformer.transform(element!, {
                             ...context,
-                            index: i,
+                            index: idx,
                         });
                         if (transformed === null) {
                             continue;
@@ -201,6 +213,7 @@ export function composeTransformers(
                             newResult.push(transformed);
                         }
                     }
+
                     result = newResult.length > 0 ? newResult : null;
                 } else {
                     result = transformer.transform(result, context);

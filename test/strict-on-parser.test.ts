@@ -64,7 +64,9 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
 
     it("should throw an error for unclosed tags in strict mode", () => {
         const input = "{tag";
-        expect(() => globalParser.parse(input)).toThrow("Unexpected end of input");
+        expect(() => globalParser.parse(input)).toThrow(
+            "Unexpected end of input",
+        );
     });
 
     it("should throw an error for tags with spaces in strict mode", () => {
@@ -96,7 +98,12 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
             {
                 type: NodeType.Function,
                 name: "func",
-                args: [{ type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "arg" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "arg" }],
+                    },
+                ],
             },
         ]);
     });
@@ -110,9 +117,18 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
                 type: NodeType.Function,
                 name: "func",
                 args: [
-                    { type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "arg1" }] },
-                    { type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "arg2" }] },
-                    { type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "arg3" }] },
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "arg1" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "arg2" }],
+                    },
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "arg3" }],
+                    },
                 ],
             },
         ]);
@@ -126,7 +142,12 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
             {
                 type: NodeType.Function,
                 name: "func",
-                args: [{ type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "a|b" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "a|b" }],
+                    },
+                ],
             },
         ]);
     });
@@ -140,7 +161,12 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
             {
                 type: NodeType.Function,
                 name: "func",
-                args: [{ type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "a\\:b" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "a\\:b" }],
+                    },
+                ],
             },
         ]);
     });
@@ -153,7 +179,12 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
             {
                 type: NodeType.Function,
                 name: "func",
-                args: [{ type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "a}b" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "a}b" }],
+                    },
+                ],
             },
         ]);
     });
@@ -173,7 +204,9 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
 
     it("should throw error for unclosed nested function", () => {
         const input = "{outer:arg{inner}";
-        expect(() => globalParser.parse(input)).toThrow("Unexpected end of input");
+        expect(() => globalParser.parse(input)).toThrow(
+            "Unexpected end of input",
+        );
     });
 
     it("should treat double backslash before pipe as escaped pipe", () => {
@@ -187,7 +220,10 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
                 type: NodeType.Function,
                 name: "func",
                 args: [
-                    { type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "\\|arg" }] },
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "\\|arg" }],
+                    },
                 ],
             },
         ]);
@@ -197,7 +233,9 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
         const input = "just plain text";
         const result = globalParser.parse(input);
 
-        expect(result).toEqual([{ type: NodeType.Text, value: "just plain text" }]);
+        expect(result).toEqual([
+            { type: NodeType.Text, value: "just plain text" },
+        ]);
     });
 
     it("should handle empty input", () => {
@@ -222,7 +260,12 @@ describe("Parser class with strict mode on and evaluateTags off", () => {
             {
                 type: NodeType.Function,
                 name: "time",
-                args: [{ type: NodeType.Argument, nodes: [{ type: NodeType.Text, value: "HH:mm:ss" }] }],
+                args: [
+                    {
+                        type: NodeType.Argument,
+                        nodes: [{ type: NodeType.Text, value: "HH:mm:ss" }],
+                    },
+                ],
             },
         ]);
     });

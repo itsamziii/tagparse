@@ -11,19 +11,29 @@ export class Stream {
      */
     private readonly buffer: number[];
 
-    /** Current code point (-1 if no current character) */
+    /**
+     * Current code point (-1 if no current character)
+     */
     private currentCodePoint: number = -1;
 
-    /** Current line number (1-based) */
+    /**
+     * Current line number (1-based)
+     */
     private line: number = 1;
 
-    /** Current column number (1-based) */
+    /**
+     * Current column number (1-based)
+     */
     private column: number = 1;
 
-    /** Character offset from start (0-based) */
+    /**
+     * Character offset from start (0-based)
+     */
     private offset: number = 0;
 
-    /** Whether we've started consuming characters */
+    /**
+     * Whether we've started consuming characters
+     */
     private started: boolean = false;
 
     public constructor(str: string) {
@@ -51,6 +61,7 @@ export class Stream {
 
     /**
      * Advances to the next character in the stream.
+     *
      * @returns true if a character was consumed, false if at end of input
      */
     public next(): boolean {
@@ -87,6 +98,10 @@ export class Stream {
      * Returns the total length of the original input.
      */
     public get length(): number {
-        return this.offset + this.buffer.length + (this.currentCodePoint !== -1 ? 1 : 0);
+        return (
+            this.offset +
+            this.buffer.length +
+            (this.currentCodePoint === -1 ? 0 : 1)
+        );
     }
 }
