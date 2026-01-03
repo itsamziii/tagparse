@@ -28,7 +28,13 @@
     "keywords": [
         "parser",
         "tags",
-        "templating"
+        "templating",
+        "tag-parser",
+        "template-engine",
+        "tokenizer",
+        "lexer",
+        "string-parser",
+        "comment-parser"
     ],
     "author": "ItsAmziii",
     "license": "MIT",
