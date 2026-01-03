@@ -28,10 +28,8 @@ jobs:
 
             - run: pnpm install --frozen-lockfile
 
-            - name: Setup npm for publishing
-              run: |
-                echo "//registry.npmjs.org/:_authToken=" >> ~/.npmrc
-                echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+            - name: Setup npm for trusted publishing
+              run: npm install -g npm@latest
 
             - name: Create Release PR or Publish
               id: changesets
