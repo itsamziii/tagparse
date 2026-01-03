@@ -6,13 +6,13 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
     publish:
         runs-on: ubuntu-latest
+        permissions:
+          id-token: write
+          pull-requests: write
+          contents: write
 
         steps:
             - uses: actions/checkout@v4
@@ -22,16 +22,26 @@ jobs:
 
             - uses: actions/setup-node@v4
               with:
-                  node-version: "20"
+                  node-version: "24"
                   cache: "pnpm"
                   registry-url: "https://registry.npmjs.org"
 
             - run: pnpm install --frozen-lockfile
 
+            - name: Setup npm for publishing
+              run: |
+                echo "//registry.npmjs.org/:_authToken=" >> ~/.npmrc
+                echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+
             - name: Create Release PR or Publish
               id: changesets
               uses: changesets/action@v1
               with:
-                  publish: pnpm run release
+                version: pnpm changeset:version
+                publish: pnpm changeset:publish
+                commit: "chore: release"
+                title: "chore: release"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_CONFIG_PROVENANCE: true
+

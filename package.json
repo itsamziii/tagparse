@@ -22,8 +22,9 @@
         "format": "prettier --write .",
         "test": "vitest run",
         "dev": "vitest",
-        "ci": "pnpm run lint && pnpm run test && pnpm run build",
-        "release": "pnpm run ci && changeset publish"
+        "ci": "pnpm run lint && pnpm run test",
+        "changeset:version": "changeset version",
+        "changeset:publish": "pnpm run build && changeset publish"
     },
     "keywords": [
         "parser",
