@@ -5,7 +5,7 @@
 </p>
 
 
-**tagparse** is a high-performance, stream-based lexer and parser library for Node.js, designed to handle asynchronous, memory-efficient parsing of custom tag-based syntax. It’s ideal for high-concurrency applications and real-time data processing where non-blocking, scalable parsing is essential.
+**tagparse** is a Unicode-aware, async lexer and parser library for Node.js. It operates on in-memory strings but exposes an async-iterator friendly API, making it easy to slot into streaming-style pipelines without sacrificing correctness on multi-byte characters.
 
 > **Use Case:** Quickly parse and process custom tags (e.g., `{variable}`, `{function:arg1|arg2}`) for templating engines, dashboards, and real-time applications.
 
@@ -14,7 +14,7 @@
 ## ✨ Features
 
 -   **Custom Tag Parsing**: Handles tags with complex argument structures (e.g., `{var}`, `{func:arg1|arg2}`).
--   **Stream-Based, Asynchronous Design**: Perfect for processing large datasets with minimal memory usage, supporting real-time and high-concurrency environments.
+-   **Async Iterator-Friendly Design**: Works with async iteration while parsing in-memory strings, so it composes cleanly with streaming pipelines.
 -   **Strict Mode for Syntax Validation**: Ensures robust syntax adherence with optional strict validation.
 -   **Flexible & Extensible**: Customize tokens, tag formats, and parsing logic as needed.
 -   **Ideal for Real-Time Applications**: Powers templating engines, dynamic dashboards, and high-performance real-time data processing.
@@ -23,7 +23,13 @@
 
 ## 📦 Installation
 
-Install via npm:
+Install via pnpm:
+
+```bash
+pnpm add tagparse
+```
+
+Or using npm:
 
 ```bash
 npm install tagparse

@@ -109,7 +109,7 @@ export class Parser {
             nameToken = await this.nextToken();
             if (nameToken.type === TokenType.Space) {
                 throw new StrictModeError(
-                    "Tags cannot contain spaces. Disable strict mode to automatically skip spaces in tags.",
+                    "Tags cannot contain spaces. Escape them or disable strict mode.",
                 );
             }
 
@@ -123,7 +123,7 @@ export class Parser {
 
             if (nextToken.type === TokenType.Space) {
                 throw new StrictModeError(
-                    "Tags cannot contain spaces. Disable strict mode to automatically skip spaces in tags.",
+                    "Tags cannot contain spaces. Escape them or disable strict mode.",
                 );
             }
         } else {
@@ -170,7 +170,7 @@ export class Parser {
             default: {
                 if (this.strict) {
                     throw new StrictModeError(
-                        "Unexpected token encountered within tag. Either esscape it or set `strict` to false to ignore it.",
+                        "Unexpected token encountered within tag. Escape it or disable strict mode.",
                     );
                 }
 

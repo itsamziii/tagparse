@@ -16,12 +16,18 @@ export class Lexer {
 
     public readonly tagEnd: string;
 
+    private readonly tagStartChars: string[];
+
+    private readonly tagEndChars: string[];
+
     private readonly stream: Stream;
 
     public constructor(input: string, { tagEnd, tagStart }: LexerOptions = {}) {
         this.stream = new Stream(input);
         this.tagStart = tagStart?.length ? tagStart : "{";
         this.tagEnd = tagEnd?.length ? tagEnd : "}";
+        this.tagStartChars = Array.from(this.tagStart);
+        this.tagEndChars = Array.from(this.tagEnd);
     }
 
     public async *[Symbol.asyncIterator](): TokenGenerator {
@@ -31,7 +37,9 @@ export class Lexer {
                 peekedChar === -1 ? "" : String.fromCodePoint(peekedChar);
 
             switch (peekedChar) {
-                case getCharPoint(this.tagStart.at(-1) as string): {
+                case getCharPoint(
+                    this.tagStartChars.at(-1) as string,
+                ): {
                     yield* this.handleTagStart(char);
                     break;
                 }
@@ -53,7 +61,9 @@ export class Lexer {
                     break;
                 }
 
-                case getCharPoint(this.tagEnd.at(-1) as string): {
+                case getCharPoint(
+                    this.tagEndChars.at(-1) as string,
+                ): {
                     yield* this.handleTagEnd(char);
                     break;
                 }
@@ -76,9 +86,11 @@ export class Lexer {
     }
 
     private async *handleTagStart(char: string): TokenGenerator {
-        const tagStartLength = this.tagStart.length;
+        const tagStartLength = this.tagStartChars.length;
         if (tagStartLength > 1) {
-            const leftOutTagStart = this.tagStart.slice(0, -1);
+            const leftOutTagStart = this.tagStartChars
+                .slice(0, -1)
+                .join("");
             if (this.buffer.endsWith(leftOutTagStart)) {
                 this.buffer = this.buffer.slice(0, -leftOutTagStart.length);
                 yield* this.addToken({
@@ -97,9 +109,9 @@ export class Lexer {
     }
 
     private async *handleTagEnd(char: string): TokenGenerator {
-        const tagEndLength = this.tagEnd.length;
+        const tagEndLength = this.tagEndChars.length;
         if (tagEndLength > 1) {
-            const leftOutTagEnd = this.tagEnd.slice(0, -1);
+            const leftOutTagEnd = this.tagEndChars.slice(0, -1).join("");
             if (this.buffer.endsWith(leftOutTagEnd)) {
                 this.buffer = this.buffer.slice(0, -leftOutTagEnd.length);
                 yield* this.addToken({

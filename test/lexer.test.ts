@@ -73,6 +73,22 @@ describe("Lexer", () => {
         ]);
     });
 
+    it("should handle multi-byte (emoji) tag delimiters", async () => {
+        const input = "🧪<नाम🔚>";
+        const lexer = new Lexer(input, { tagStart: "🧪<", tagEnd: "🔚>" });
+        const tokens = [];
+
+        for await (const token of lexer) {
+            tokens.push(token);
+        }
+
+        expect(tokens).toEqual([
+            { type: TokenType.TagStart, value: "🧪<" },
+            { type: TokenType.Literal, value: "नाम" },
+            { type: TokenType.TagEnd, value: "🔚>" },
+        ]);
+    });
+
     it("should handle spaces within tags", async () => {
         const input = "{tag with spaces}";
         const lexer = new Lexer(input);
