@@ -14,8 +14,11 @@ importers:
       '@types/node':
         specifier: ^22.8.2
         version: 22.19.3
+      eslint:
+        specifier: 9.39.2
+        version: 9.39.2
       eslint-config-neon:
-        specifier: ^0.2.0
+        specifier: ^0.2.9
         version: 0.2.9(@typescript-eslint/types@8.51.0)(@typescript-eslint/utils@8.51.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(svelte@3.59.2)(typescript@5.9.3)
       prettier:
         specifier: ^3.3.3
@@ -6780,7 +6783,7 @@ snapshots:
 
   refa@0.12.1:
     dependencies:
-      '@eslint-community/regexpp': 4.12.1
+      '@eslint-community/regexpp': 4.12.2
 
   reflect.getprototypeof@1.0.10:
     dependencies:
@@ -6795,7 +6798,7 @@ snapshots:
 
   regexp-ast-analysis@0.7.1:
     dependencies:
-      '@eslint-community/regexpp': 4.12.1
+      '@eslint-community/regexpp': 4.12.2
       refa: 0.12.1
 
   regexp-tree@0.1.27: {}
@@ -6938,7 +6941,7 @@ snapshots:
 
   scslre@0.3.0:
     dependencies:
-      '@eslint-community/regexpp': 4.12.1
+      '@eslint-community/regexpp': 4.12.2
       refa: 0.12.1
       regexp-ast-analysis: 0.7.1
 
