@@ -5,21 +5,21 @@ export class FunctionTagParser extends TagParser {
     private readonly parserFn: (
         funcName: string,
         args: ArgumentNode[],
-    ) => Promise<string>;
+    ) => unknown;
 
     public constructor(
-        parserFn: (funcName: string, args: ArgumentNode[]) => Promise<string>,
+        parserFn: (funcName: string, args: ArgumentNode[]) => unknown,
     ) {
         super();
         this.parserFn = parserFn;
     }
 
-    public async parse(name: string, args: ArgumentNode[]): Promise<Node> {
+    public parse(name: string, args: ArgumentNode[]): Node {
         return {
             type: NodeType.Function,
             name,
             args,
-            value: await this.parserFn(name, args),
+            value: this.parserFn(name, args),
         };
     }
 }
