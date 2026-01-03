@@ -5,73 +5,59 @@ import {
     type TokenGenerator,
     type ArgumentNode,
     type Node,
-    type ParserOptions,
+    type ParserAsyncOptions,
     type LexerOptions,
+    type TFunctionParserAsyncFn,
+    type TVariableParserAsyncFn,
 } from "../../types.js";
 import { TagParseError, StrictModeError, type Position } from "../Errors.js";
 import { Lexer } from "../Lexer.js";
-import { FunctionTagParser } from "./TagParsers/FunctionTagParser.js";
-import { VariableTagParser } from "./TagParsers/VariableTagParser.js";
 
-export class Parser {
+type ParsedArgument = {
+    arg: ArgumentNode | null;
+    raw: string;
+    endedWithTagEnd: boolean;
+    endedWithEof: boolean;
+};
+
+/**
+ * Async parser that mirrors Parser but awaits evaluation hooks.
+ */
+export class ParserAsync {
     private input!: TokenGenerator;
-
     private lexer!: Lexer;
-
     private nodes: Node[] = [];
-
     private stack: ReadonlyToken[] = [];
-
-    private reachedEof: boolean = false;
-
+    private reachedEof = false;
     private currentPosition: Position = { line: 1, column: 1, offset: 0 };
-
     private readonly evaluateTags: boolean = false;
-
-    /**
-     * Strict mode rules:
-     * - No empty tags allowed, i.e. "{}" will throw an error
-     * - No spaces within function tag names or variable tags
-     * - All tags are expected to end, reaching end of input before the end of tag will throw an error
-     * - All tags should start with tagStart, i.e. "{" by default, and end with "}" by default.
-     * - You are expected to supply at least one argument to function tags
-     */
     private readonly strict: boolean = false;
-
-    private readonly functionParser?: FunctionTagParser;
-
-    private readonly variableParser?: VariableTagParser;
-
+    private readonly functionParser: TFunctionParserAsyncFn;
+    private readonly variableParser: TVariableParserAsyncFn;
     private readonly lexerOptions: LexerOptions = {};
 
-    public constructor(options?: ParserOptions) {
-        // Support both evaluateTags (new) and parseTags (deprecated)
-        this.evaluateTags = Boolean(
-            options?.evaluateTags ?? options?.parseTags,
-        );
+    public constructor(options?: ParserAsyncOptions) {
+        this.evaluateTags = Boolean(options?.evaluateTags ?? options?.parseTags);
         this.strict = Boolean(options?.strict);
         this.lexerOptions = options?.lexerOptions ?? {};
 
-        if (this.evaluateTags) {
-            if (
-                typeof options?.functionParser !== "function" ||
-                typeof options?.variableParser !== "function"
-            ) {
-                throw new TagParseError(
-                    "Function and variable parser functions must be provided when `evaluateTags` is enabled",
-                );
-            }
-
-            this.functionParser = new FunctionTagParser(options.functionParser);
-            this.variableParser = new VariableTagParser(options.variableParser);
-        }
+        // Provide safe fallbacks so async evaluation is optional.
+        this.functionParser =
+            options?.functionParser ??
+            (async () => {
+                return "";
+            });
+        this.variableParser =
+            options?.variableParser ??
+            (async (name: string) => {
+                return name;
+            });
     }
 
     /**
-     * Parse input string and return AST nodes.
-     * Sync in v2.
+     * Parse input string and return AST nodes (async evaluation supported).
      */
-    public parse(input: string): Node[] {
+    public async parseAsync(input: string): Promise<Node[]> {
         this.nodes = [];
         this.stack = [];
         this.reachedEof = false;
@@ -85,7 +71,6 @@ export class Parser {
 
             if (token.type === TokenType.TagStart) {
                 if (buffer.length) {
-                    // Check if the last character is an escape character
                     if (buffer.at(-1) === "\\") {
                         buffer = buffer.slice(0, -1) + token.value;
                         continue;
@@ -95,7 +80,7 @@ export class Parser {
                     buffer = "";
                 }
 
-                const parsedTag = this.parseTag();
+                const parsedTag = await this.parseTag();
                 if (parsedTag.type === NodeType.Text) {
                     this.pushTextNode(parsedTag.value);
                 } else {
@@ -122,7 +107,7 @@ export class Parser {
         }
     }
 
-    private parseTag(): Node {
+    private async parseTag(): Promise<Node> {
         let nameToken: ReadonlyToken;
         let nextToken: ReadonlyToken;
 
@@ -170,13 +155,20 @@ export class Parser {
                     return { type: NodeType.Text, value: "" };
                 }
 
-                return this.evaluateTags
-                    ? this.variableParser!.parse(name)
-                    : { type: NodeType.Variable, raw: name };
+                if (!this.evaluateTags) {
+                    return { type: NodeType.Variable, raw: name };
+                }
+
+                const value = await this.variableParser(name);
+                return {
+                    type: NodeType.Variable,
+                    raw: name,
+                    value,
+                };
             }
 
             case TokenType.Colon: {
-                const { args, closed, raw } = this.parseFunctionArguments();
+                const { args, closed, raw } = await this.parseFunctionArguments();
                 if (!closed) {
                     return {
                         type: NodeType.Text,
@@ -191,9 +183,17 @@ export class Parser {
                     );
                 }
 
-                return this.evaluateTags
-                    ? this.functionParser!.parse(name, args)
-                    : { type: NodeType.Function, name, args };
+                if (!this.evaluateTags) {
+                    return { type: NodeType.Function, name, args };
+                }
+
+                const value = await this.functionParser(name, args);
+                return {
+                    type: NodeType.Function,
+                    name,
+                    args,
+                    value,
+                };
             }
 
             default: {
@@ -212,37 +212,27 @@ export class Parser {
         }
     }
 
-    private parseFunctionArguments(): {
+    private async parseFunctionArguments(): Promise<{
         args: ArgumentNode[];
         closed: boolean;
         raw: string;
-    } {
+    }> {
         const args: ArgumentNode[] = [];
         let closed = false;
         let raw = "";
 
         while (true) {
-            const part = this.parseArgument();
-            if (!part) {
-                break;
-            }
+            const part = await this.parseArgument();
+            if (!part) break;
 
             raw += part.raw;
 
             if (part.arg) {
                 if (this.evaluateTags) {
-                    part.arg.finalValue = part.arg.nodes.reduce(
-                        (acc, node) => {
-                            // Extract value from node based on its type
-                            if ("value" in node) {
-                                return acc + String(node.value ?? "");
-                            }
-                            return acc;
-                        },
-                        "",
+                    part.arg.finalValue = await this.resolveNodesToString(
+                        part.arg.nodes,
                     );
                 }
-
                 args.push(part.arg);
             }
 
@@ -257,19 +247,13 @@ export class Parser {
         }
 
         if (closed) {
-            // Remove the tagEnd token from the stack
             this.stack.pop();
         }
 
         return { args, closed, raw };
     }
 
-    private parseArgument(): {
-        arg: ArgumentNode | null;
-        raw: string;
-        endedWithTagEnd: boolean;
-        endedWithEof: boolean;
-    } | null {
+    private async parseArgument(): Promise<ParsedArgument | null> {
         const argNodes: Node[] = [];
         let buffer = "";
         let raw = "";
@@ -286,7 +270,6 @@ export class Parser {
                     buffer = buffer.slice(0, -1) + token.value;
                     continue;
                 }
-
                 break;
             } else if (token.type === TokenType.TagEnd) {
                 raw += token.value;
@@ -310,11 +293,10 @@ export class Parser {
                         type: NodeType.Text,
                         value: buffer,
                     });
-
                     buffer = "";
                 }
 
-                const parsed = this.parseTag();
+                const parsed = await this.parseTag();
                 argNodes.push(parsed);
             } else {
                 buffer += token.value;
@@ -369,16 +351,25 @@ export class Parser {
 
     private skip(omitType: TokenType): ReadonlyToken {
         let token: ReadonlyToken;
-
         do {
             token = this.nextToken();
         } while (token.type === omitType);
-
         return token;
     }
 
     private resetIterator(source: string): void {
         this.lexer = new Lexer(source, this.lexerOptions);
         this.input = this.lexer[Symbol.iterator]();
+    }
+
+    private async resolveNodesToString(nodes: Node[]): Promise<string> {
+        let result = "";
+        for (const node of nodes) {
+            if ("value" in node) {
+                const maybeValue = (node as { value?: unknown }).value;
+                result += String(maybeValue ?? "");
+            }
+        }
+        return result;
     }
 }

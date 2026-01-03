@@ -1,148 +1,277 @@
-# 🏷️ tagparse
+# tagparse
 
-<p align="center">
-    <img src="https://i.imgur.com/lAYtRnG.png">
-</p>
+A Unicode-aware, sync lexer and parser library for Node.js. Parse custom tag syntax like `{variable}` and `{function:arg1|arg2}` for templating engines, dashboards, and real-time applications.
 
+## Features
 
-**tagparse** is a Unicode-aware, async lexer and parser library for Node.js. It operates on in-memory strings but exposes an async-iterator friendly API, making it easy to slot into streaming-style pipelines without sacrificing correctness on multi-byte characters.
+- **Custom Tag Parsing**: Handles tags with complex argument structures
+- **Sync API**: Fast, synchronous parsing (v2.0)
+- **Position Tracking**: Error messages include line/column numbers
+- **Strict Mode**: Optional syntax validation
+- **Extensible**: Transformers and visitors for AST shaping
+- **Sync Only**: Entire API is synchronous (parsing and evaluation)
+- **Unicode Support**: Correctly handles emoji and multi-byte characters
 
-> **Use Case:** Quickly parse and process custom tags (e.g., `{variable}`, `{function:arg1|arg2}`) for templating engines, dashboards, and real-time applications.
-
----
-
-## ✨ Features
-
--   **Custom Tag Parsing**: Handles tags with complex argument structures (e.g., `{var}`, `{func:arg1|arg2}`).
--   **Async Iterator-Friendly Design**: Works with async iteration while parsing in-memory strings, so it composes cleanly with streaming pipelines.
--   **Strict Mode for Syntax Validation**: Ensures robust syntax adherence with optional strict validation.
--   **Flexible & Extensible**: Customize tokens, tag formats, and parsing logic as needed.
--   **Ideal for Real-Time Applications**: Powers templating engines, dynamic dashboards, and high-performance real-time data processing.
-
----
-
-## 📦 Installation
-
-Install via pnpm:
-
-```bash
-pnpm add tagparse
-```
-
-Or using npm:
+## Installation
 
 ```bash
 npm install tagparse
 ```
 
----
-
-## 🚀 Usage
-
-`tagparse` is particularly useful for custom syntax processing in templating engines, real-time chat systems, or data stream processing applications.
-
-### 🛠️ Basic Example
+## Quick Start
 
 ```javascript
-import { Lexer, Parser, NodeType } from "tagparse";
+import { Parser, NodeType } from "tagparse";
 
-const inputText = "Hello {user}, your balance is {balance}!";
+const parser = new Parser();
+const nodes = parser.parse("Hello {user}, your balance is {balance}!");
 
-// Step 1: Initialize the Parser
-const parser = new Parser(inputText, {
+// Result:
+// [
+//   { type: "Text", value: "Hello " },
+//   { type: "Variable", raw: "user" },
+//   { type: "Text", value: ", your balance is " },
+//   { type: "Variable", raw: "balance" },
+//   { type: "Text", value: "!" }
+// ]
+```
+
+> Note: The entire public API is synchronous, including tag evaluation. If you need async data fetching or IO during parsing, resolve data before calling `parse` or transform results afterward.
+
+## Custom Tag Delimiters
+
+```javascript
+const parser = new Parser({
     lexerOptions: { tagStart: "{{", tagEnd: "}}" },
-    parseTags: true,
-    strict: true,
 });
 
-// Step 2: Parse the text
-(async () => {
-    const nodes = await parser.parse();
-    console.log(nodes); // Parsed tokens and nodes
-})();
+const nodes = parser.parse("Hello {{name}}!");
 ```
 
-### 🔧 Customizing Tags and Syntax
+## Evaluating Tags
 
-Easily define custom tag formats, enable strict mode for syntax validation, and configure tag handling:
+Use `evaluateTags` with custom parsers to resolve variables and functions:
 
 ```javascript
-const parser = new Parser("Hello {{user}}", {
-    lexerOptions: { tagStart: "{{", tagEnd: "}}" },
-    parseTags: true,
-    strict: true,
+const data = { user: "Alice" };
+const parser = new Parser({
+    evaluateTags: true,
+    variableParser: (name) => data[name] ?? "",
+    functionParser: (name, args) => {
+        if (name === "upper") return args[0].finalValue.toUpperCase();
+        return "";
+    },
 });
+
+const nodes = parser.parse("Hello {user}! {upper:hello}");
+// Variables and functions are resolved with their values
 ```
 
-### 📄 Example Use Case: Template Processing
+## Async Evaluation
 
-This example demonstrates how to use the parser to replace placeholders dynamically within a template:
+Use `ParserAsync` when your resolvers need to call APIs or databases:
 
 ```javascript
-(async () => {
-    const values = {
-        name: "John",
-        orderId: "12345",
-    };
+import { ParserAsync } from "tagparse";
 
-    const parser = new Parser(inputText);
-    const nodes = await parser.parse();
+const parser = new ParserAsync({
+    evaluateTags: true,
+    variableParser: async (name) => fetchUser(name), // returns a promise
+    functionParser: async (name, args) => {
+        if (name === "upper") return (args[0]?.finalValue ?? "").toUpperCase();
+        return "";
+    },
+});
 
-    // Implement an on-the-go interpreter via `variableParser` & `functionParser`
-    const result = nodes
-        .map((node) => {
-            if (node.type === NodeType.Variable && node.raw in values) {
-                return values[node.raw];
-            }
-            return node.value;
-        })
-        .join("");
-
-    console.log(result); // Outputs: "Hello, John! Your order #12345 is confirmed."
-})();
+const nodes = await parser.parseAsync("Hello {user}! {upper:hello}");
 ```
 
----
+If you skip `variableParser`/`functionParser`, async evaluation falls back to no-op resolvers so parsing still works.
 
-## 📚 API Reference
+## Rendering Safety Helpers
 
-### Lexer
+For templated output, escape values before sending to chat or HTML:
 
-The `Lexer` class tokenizes a given input string, identifying tags, literals, and other specified tokens.
+```javascript
+import { escapeForDiscord, escapeHtml } from "tagparse";
 
--   **Constructor**: `new Lexer(input: string, options: LexerOptions)`
-    -   **input**: The string to tokenize.
-    -   **options**: Configuration options, like `tagStart` and `tagEnd`.
+const safeDiscord = escapeForDiscord(valueFromParser);
+const safeHtml = escapeHtml(valueFromParser);
+```
+
+## Strict Mode
+
+Enable strict mode for syntax validation:
+
+```javascript
+const parser = new Parser({ strict: true });
+
+// These will throw StrictModeError:
+parser.parse("{}");           // Empty tags not allowed
+parser.parse("{spaced tag}"); // Spaces in tags not allowed
+parser.parse("{unclosed");    // Unclosed tags not allowed
+```
+
+Errors include position information:
+
+```javascript
+try {
+    parser.parse("{bad tag}");
+} catch (error) {
+    console.log(error.position); // { line: 1, column: 5, offset: 4 }
+}
+```
+
+## AST Transformers
+
+Transform the AST after parsing:
+
+```javascript
+import { Parser, transform, removeEmptyText, createVariableResolver } from "tagparse";
+
+const parser = new Parser();
+const nodes = parser.parse("Hello {name}!");
+
+// Apply transformers
+const resolved = transform(nodes, [
+    createVariableResolver({ name: "World" }),
+    removeEmptyText,
+]);
+```
+
+Built-in transformers:
+- `removeEmptyText` - Remove empty text nodes
+- `removeWhitespaceText` - Remove whitespace-only text nodes
+- `trimTextNodes` - Trim whitespace from text nodes
+- `normalizeWhitespace` - Collapse multiple spaces
+- `createVariableResolver(map)` - Resolve variables from a map
+
+## AST Visitors
+
+Walk the AST with the visitor pattern:
+
+```javascript
+import { Parser, walk, walkDeep, findNodes, NodeType } from "tagparse";
+
+const parser = new Parser();
+const nodes = parser.parse("{a} and {b:1|2}");
+
+// Walk top-level nodes
+walk(nodes, {
+    visitVariable(node) {
+        console.log("Variable:", node.raw);
+    },
+    visitFunction(node) {
+        console.log("Function:", node.name);
+    },
+});
+
+// Walk deeply (including function arguments)
+walkDeep(nodes, {
+    enter(node) {
+        console.log("Entering:", node.type);
+    },
+    leave(node) {
+        console.log("Leaving:", node.type);
+    },
+});
+
+// Find specific nodes
+const variables = findNodes(nodes, (n) => n.type === NodeType.Variable);
+```
+
+## API Reference
 
 ### Parser
 
-The `Parser` class consumes tokens from the lexer and constructs a structured representation of the text (AST).
+```typescript
+const parser = new Parser({
+    strict?: boolean,           // Enable strict mode validation
+    evaluateTags?: boolean,     // Enable tag evaluation
+    functionParser?: (name: string, args: ArgumentNode[]) => unknown,
+    variableParser?: (name: string) => unknown,
+    lexerOptions?: {
+        tagStart?: string,      // Default: "{"
+        tagEnd?: string,        // Default: "}"
+    },
+});
 
--   **Constructor**: `new Parser(input: string, options: ParserOptions)`
+const nodes: Node[] = parser.parse(input: string);
+```
 
-    -   **input**: The input text.
-    -   **options**: Configuration options, including:
-        -   **parseTags**: Enable/disable tag parsing.
-        -   **strict**: Enable strict mode for syntax validation.
-        -   **functionParser** and **variableParser**: Optional handlers for custom tag logic.
+### ParserAsync
 
--   **Methods**:
-    -   `parse()`: Asynchronously parses the input and returns an array of nodes.
+```typescript
+const parser = new ParserAsync({
+    strict?: boolean,
+    evaluateTags?: boolean, // When true, parsers can return promises
+    functionParser?: (name: string, args: ArgumentNode[]) => unknown | Promise<unknown>,
+    variableParser?: (name: string) => unknown | Promise<unknown>,
+    lexerOptions?: {
+        tagStart?: string,
+        tagEnd?: string,
+    },
+});
 
----
+const nodes: Node[] = await parser.parseAsync(input: string);
+```
 
-## 🤝 Contributing
+### Lexer
 
-Contributions are welcomed! If you find a bug or want to suggest an improvement, feel free to open an issue or submit a pull request.
+```typescript
+const lexer = new Lexer(input: string, options?: LexerOptions);
 
----
+for (const token of lexer) {
+    console.log(token.type, token.value, token.position);
+}
+```
 
-## 📄 License
+### Node Types
 
-This library is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+```typescript
+type Node = TextNode | VariableNode | FunctionNode;
 
----
+interface TextNode {
+    type: "Text";
+    value: string;
+}
 
-## 🙏 Acknowledgments
+interface VariableNode {
+    type: "Variable";
+    raw: string;
+    value?: unknown;  // Set when evaluateTags is true
+}
 
-Special thanks to [@aelxxs/ikigai](https://github.com/aelxxs/ikigai) for inspiration.
+interface FunctionNode {
+    type: "Function";
+    name: string;
+    args: ArgumentNode[];
+    value?: unknown;  // Set when evaluateTags is true
+}
+
+interface ArgumentNode {
+    type: "Argument";
+    nodes: Node[];
+    finalValue?: string;
+}
+```
+
+### Errors
+
+```typescript
+import { TagParseError, StrictModeError } from "tagparse";
+
+// Both include position information
+interface Position {
+    line: number;    // 1-based
+    column: number;  // 1-based
+    offset: number;  // 0-based character offset
+}
+```
+## License
+
+MIT
+
+## Acknowledgments
+
+Inspired by [@aelxxs/ikigai](https://github.com/aelxxs/ikigai).

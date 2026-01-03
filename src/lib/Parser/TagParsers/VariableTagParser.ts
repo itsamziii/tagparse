@@ -10,11 +10,11 @@ export class VariableTagParser extends TagParser {
         this.parserFn = parserFn;
     }
 
-    public async parse(raw: string): Promise<Node> {
+    public parse(raw: string): Node {
         return {
             type: NodeType.Variable,
             raw,
-            value: await this.parserFn(raw),
+            value: this.parserFn(raw),
         };
     }
 }
