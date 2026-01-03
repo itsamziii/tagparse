@@ -1,18 +1,14 @@
-import { Readable } from "node:stream";
-
-export class Stream extends Readable {
-    private buffer: string[] = [];
+export class Stream {
+    /**
+     * Stores code points (not UTF-16 code units) to correctly support
+     * multi-byte characters such as emoji or non-Latin scripts.
+     */
+    private readonly buffer: number[];
 
     private position: number = -1;
 
     public constructor(str: string) {
-        super();
-        this.push(str);
-        this.push(null);
-    }
-
-    public override _read(size: number) {
-        // No-op since we handle the push in the constructor
+        this.buffer = Array.from(str, (char) => char.codePointAt(0)!);
     }
 
     public peek(): number {
@@ -21,26 +17,11 @@ export class Stream extends Readable {
 
     public async next(): Promise<boolean> {
         if (this.buffer.length === 0) {
-            const chunk = await this.readChunk();
-            if (!chunk) {
-                return false;
-            }
-
-            this.buffer.push(...chunk);
+            this.position = -1;
+            return false;
         }
 
-        this.position = Number(this.buffer.shift()!);
+        this.position = this.buffer.shift()!;
         return true;
-    }
-
-    private async readChunk(): Promise<string | null> {
-        return new Promise((resolve) => {
-            const chunk = this.read();
-            if (chunk === null) {
-                this.once("readable", () => resolve(this.read()));
-            } else {
-                resolve(chunk);
-            }
-        });
     }
 }

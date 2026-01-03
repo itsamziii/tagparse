@@ -86,7 +86,7 @@ describe("Parser class with strict mode on and parseTags off", () => {
         const input = "{spaced tag}";
         const parser = new Parser(input, { strict: true });
         await expect(parser.parse()).rejects.toThrow(
-            "Tags cannot contain spaces.",
+            "Tags cannot contain spaces. Escape them or disable strict mode.",
         );
     });
 
@@ -94,7 +94,7 @@ describe("Parser class with strict mode on and parseTags off", () => {
         const input = "{outer{inner}}";
         const parser = new Parser(input, { strict: true });
         await expect(parser.parse()).rejects.toThrow(
-            "Unexpected token encountered within tag.",
+            "Unexpected token encountered within tag. Escape it or disable strict mode.",
         );
     });
 

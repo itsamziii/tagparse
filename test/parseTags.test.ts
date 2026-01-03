@@ -33,6 +33,26 @@ describe("Parser class with parseTags set to true", () => {
         ]);
     });
 
+    it("should parse a variable tag with emoji delimiters", async () => {
+        const input = "🧪<नाम🔚>";
+        const parser = new Parser(input, {
+            strict: true,
+            lexerOptions: { tagStart: "🧪<", tagEnd: "🔚>" },
+            functionParser,
+            variableParser,
+            parseTags: true,
+        });
+        const result = await parser.parse();
+
+        expect(result).toEqual([
+            {
+                type: NodeType.Variable,
+                raw: "नाम",
+                value: "Parsed नाम variable",
+            },
+        ]);
+    });
+
     it("should parse a function tag with arguments", async () => {
         const input = "{add:1|2}";
         const parser = new Parser(input, {
