@@ -394,6 +394,7 @@ export class Parser {
     private serializeNodesToRaw(nodes: Node[]): string {
         return nodes
             .map((node) => {
+                // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
                 switch (node.type) {
                     case NodeType.Text:
                         return node.value;
