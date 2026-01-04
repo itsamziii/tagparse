@@ -1,4 +1,4 @@
-import type { Node, TVariableParserFn } from "../../../types.js";
+import type { TVariableParserFn, VariableNode } from "../../../types.js";
 import { NodeType } from "../../../types.js";
 import { TagParser } from "./TagParser.js";
 
@@ -10,7 +10,7 @@ export class VariableTagParser extends TagParser {
         this.parserFn = parserFn;
     }
 
-    public parse(raw: string): Node {
+    public parse(raw: string): VariableNode {
         return {
             type: NodeType.Variable,
             raw,

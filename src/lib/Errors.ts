@@ -14,7 +14,7 @@ export type Position = {
      * Character offset from start (0-based)
      */
     offset: number;
-}
+};
 
 /**
  * Base error class for all tagparse errors

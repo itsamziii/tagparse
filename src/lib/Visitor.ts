@@ -40,7 +40,7 @@ export type VisitContext = {
      * Stop traversal of remaining siblings
      */
     stop(): void;
-}
+};
 
 /**
  * Visitor interface for traversing AST nodes
@@ -80,7 +80,7 @@ export type Visitor = {
      * Called for Variable nodes
      */
     visitVariable?(node: VariableNode, context: VisitContext): void;
-}
+};
 
 /**
  * Internal state for traversal control
@@ -88,7 +88,7 @@ export type Visitor = {
 type TraversalState = {
     skipChildren: boolean;
     stopped: boolean;
-}
+};
 
 /**
  * Walk through AST nodes, calling visitor methods.

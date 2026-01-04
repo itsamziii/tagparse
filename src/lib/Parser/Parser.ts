@@ -7,6 +7,7 @@ import {
     type Node,
     type ParserOptions,
     type LexerOptions,
+    type ParseResult,
 } from "../../types.js";
 import { TagParseError, StrictModeError, type Position } from "../Errors.js";
 import { Lexer } from "../Lexer.js";
@@ -18,7 +19,7 @@ export class Parser {
 
     private lexer!: Lexer;
 
-    private nodes: Node[] = [];
+    private nodes: ParseResult[] = [];
 
     private stack: ReadonlyToken[] = [];
 
@@ -71,7 +72,7 @@ export class Parser {
      * Parse input string and return AST nodes.
      * Sync in v2.
      */
-    public parse(input: string): Node[] {
+    public parse(input: string): ParseResult[] {
         this.nodes = [];
         this.stack = [];
         this.reachedEof = false;
@@ -122,7 +123,7 @@ export class Parser {
         }
     }
 
-    private parseTag(): Node {
+    private parseTag(): ParseResult {
         let nameToken: ReadonlyToken;
         let nextToken: ReadonlyToken;
 
@@ -306,8 +307,8 @@ export class Parser {
                 endedWithTagEnd = true;
                 break;
             } else if (token.type === TokenType.TagStart) {
-                raw += token.value;
                 if (escaped) {
+                    raw += token.value;
                     buffer = buffer.slice(0, -1) + token.value;
                     continue;
                 }
@@ -323,6 +324,7 @@ export class Parser {
 
                 const parsed = this.parseTag();
                 argNodes.push(parsed);
+                raw += this.serializeParsedNodeToRaw(parsed);
             } else {
                 buffer += token.value;
                 raw += token.value;
@@ -387,5 +389,28 @@ export class Parser {
     private resetIterator(source: string): void {
         this.lexer = new Lexer(source, this.lexerOptions);
         this.input = this.lexer[Symbol.iterator]();
+    }
+
+    private serializeNodesToRaw(nodes: Node[]): string {
+        return nodes
+            .map((node) => {
+                switch (node.type) {
+                    case NodeType.Text:
+                        return node.value;
+                    case NodeType.Variable:
+                        return `${this.lexer.tagStart}${node.raw}${this.lexer.tagEnd}`;
+                    case NodeType.Function:
+                        return `${this.lexer.tagStart}${node.name}:${node.args
+                            .map((arg) => this.serializeNodesToRaw(arg.nodes))
+                            .join("|")}${this.lexer.tagEnd}`;
+                    default:
+                        return "";
+                }
+            })
+            .join("");
+    }
+
+    private serializeParsedNodeToRaw(node: ParseResult): string {
+        return this.serializeNodesToRaw([node as Node]);
     }
 }

@@ -6,7 +6,10 @@ export function getCharPoint(char: string) {
  * Escape characters that Discord interprets as markdown.
  */
 export function escapeForDiscord(input: string): string {
-    return input.replaceAll(/(?<markdownChar>[*>\\_`|~])/g, "\\$<markdownChar>");
+    return input.replaceAll(
+        /(?<markdownChar>[*>\\_`|~])/g,
+        "\\$<markdownChar>",
+    );
 }
 
 /**
@@ -14,9 +17,9 @@ export function escapeForDiscord(input: string): string {
  */
 export function escapeHtml(input: string): string {
     return input
-        .replaceAll('&', "&amp;")
-        .replaceAll('<', "&lt;")
-        .replaceAll('>', "&gt;")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
-        .replaceAll('\'', "&#39;");
+        .replaceAll("'", "&#39;");
 }

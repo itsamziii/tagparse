@@ -11,7 +11,12 @@ export type LexerOptions = {
  * Built-in token types.
  */
 export type BuiltinTokenType =
-    "Colon" | "Literal" | "Pipe" | "Space" | "TagEnd" | "TagStart";
+    | "Colon"
+    | "Literal"
+    | "Pipe"
+    | "Space"
+    | "TagEnd"
+    | "TagStart";
 
 /**
  * Token type - either a built-in type or a custom string type
@@ -136,3 +141,5 @@ export type VariableNode = {
  * Custom nodes should extend this pattern.
  */
 export type Node = ArgumentNode | FunctionNode | TextNode | VariableNode;
+
+export type ParseResult = FunctionNode | TextNode | VariableNode;

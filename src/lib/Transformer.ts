@@ -28,7 +28,7 @@ export type TransformContext = {
      * Parent node (if any)
      */
     parent?: Node;
-}
+};
 
 /**
  * Transformer interface for modifying AST nodes
@@ -51,7 +51,7 @@ export type Transformer = {
      *   - null to remove the node
      */
     transform(node: Node, context: TransformContext): Node | Node[] | null;
-}
+};
 
 /**
  * Apply transformers to an array of nodes

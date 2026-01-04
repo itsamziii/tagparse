@@ -3,7 +3,7 @@ import { Lexer, TokenType } from "../src/index.js";
 
 // Helper to strip position from tokens for easier comparison
 function stripPositions(
-    tokens: { position?: unknown, type: string; value: string; }[],
+    tokens: { position?: unknown; type: string; value: string }[],
 ) {
     return tokens.map(({ type, value }) => ({ type, value }));
 }

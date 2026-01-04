@@ -117,7 +117,9 @@ export function createVariableResolver(
  */
 export function filterByType(...types: string[]): Transformer {
     const typeSet = new Set(types);
-    return createTransformer("filterByType", (node) => typeSet.has(node.type) ? node : null);
+    return createTransformer("filterByType", (node) =>
+        typeSet.has(node.type) ? node : null,
+    );
 }
 
 /**

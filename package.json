@@ -1,7 +1,7 @@
 {
     "name": "tagparse",
     "description": "A way to parse tags.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": false,
     "main": "./dist/cjs/index.cjs",
     "module": "./dist/esm/index.mjs",
