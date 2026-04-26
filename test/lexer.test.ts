@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Lexer, TokenType } from "../src/index.js";
 
 // Helper to strip position from tokens for easier comparison
@@ -254,17 +254,32 @@ describe("Lexer", () => {
     it("should track positions correctly", () => {
         const lexer = new Lexer("{a}");
         const tokens = [...lexer];
+        const [first, second, third] = tokens;
 
-        expect(tokens[0]!.position).toEqual({ line: 1, column: 1, offset: 0 });
-        expect(tokens[1]!.position).toEqual({ line: 1, column: 2, offset: 1 });
-        expect(tokens[2]!.position).toEqual({ line: 1, column: 3, offset: 2 });
+        expect(first).toBeDefined();
+        expect(second).toBeDefined();
+        expect(third).toBeDefined();
+        if (!first || !second || !third) {
+            throw new Error("Expected three tokens for input {a}");
+        }
+
+        expect(first.position).toEqual({ line: 1, column: 1, offset: 0 });
+        expect(second.position).toEqual({ line: 1, column: 2, offset: 1 });
+        expect(third.position).toEqual({ line: 1, column: 3, offset: 2 });
     });
 
     it("should track line numbers across newlines", () => {
         const lexer = new Lexer("a\n{b}");
         const tokens = [...lexer];
+        const [first, second] = tokens;
 
-        expect(tokens[0]!.position?.line).toBe(1);
-        expect(tokens[1]!.position?.line).toBe(2);
+        expect(first).toBeDefined();
+        expect(second).toBeDefined();
+        if (!first || !second) {
+            throw new Error("Expected two tokens for input a\\n{b}");
+        }
+
+        expect(first.position?.line).toBe(1);
+        expect(second.position?.line).toBe(2);
     });
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { FunctionNode, VariableNode } from "../src";
 import { escapeForDiscord, escapeHtml, NodeType, ParserAsync } from "../src";
 
 describe("ParserAsync", () => {
@@ -21,11 +22,19 @@ describe("ParserAsync", () => {
 
         const nodes = await parser.parseAsync("Hello {user}! {wrap:ok}");
         const variable = nodes.find(
-            (node) => node.type === NodeType.Variable,
-        ) as any;
+            (node): node is VariableNode => node.type === NodeType.Variable,
+        );
         const func = nodes.find(
-            (node) => node.type === NodeType.Function,
-        ) as any;
+            (node): node is FunctionNode => node.type === NodeType.Function,
+        );
+
+        expect(variable).toBeDefined();
+        expect(func).toBeDefined();
+        if (!variable || !func) {
+            throw new Error(
+                "Expected variable and function nodes to be parsed",
+            );
+        }
 
         expect(variable.value).toBe("USER");
         expect(func.value).toBe("[ok]");
@@ -36,8 +45,13 @@ describe("ParserAsync", () => {
         const parser = new ParserAsync({ evaluateTags: true });
         const nodes = await parser.parseAsync("Hello {user}");
         const variable = nodes.find(
-            (node) => node.type === NodeType.Variable,
-        ) as any;
+            (node): node is VariableNode => node.type === NodeType.Variable,
+        );
+        expect(variable).toBeDefined();
+        if (!variable) {
+            throw new Error("Expected variable node to be parsed");
+        }
+
         expect(variable.value).toBe("user");
     });
 });

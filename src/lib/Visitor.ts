@@ -1,8 +1,8 @@
 import {
-    NodeType,
     type ArgumentNode,
     type FunctionNode,
     type Node,
+    NodeType,
     type TextNode,
     type VariableNode,
 } from "../types.js";
@@ -123,10 +123,13 @@ function walkNodes(
     depth: number,
     state: TraversalState,
 ): void {
-    for (const [index, node_] of nodes.entries()) {
+    for (let index = 0; index < nodes.length; index++) {
         if (state.stopped) break;
 
-        const node = node_!;
+        const node = nodes[index];
+        if (!node) {
+            continue;
+        }
         state.skipChildren = false;
 
         const context = createContext(ancestors, index, depth, state);
@@ -154,10 +157,13 @@ function walkNodesDeep(
     depth: number,
     state: TraversalState,
 ): void {
-    for (const [index, node_] of nodes.entries()) {
+    for (let index = 0; index < nodes.length; index++) {
         if (state.stopped) break;
 
-        const node = node_!;
+        const node = nodes[index];
+        if (!node) {
+            continue;
+        }
         state.skipChildren = false;
 
         const context = createContext(ancestors, index, depth, state);

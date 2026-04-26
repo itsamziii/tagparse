@@ -1,8 +1,8 @@
 import {
-    NodeType,
     type ArgumentNode,
     type FunctionNode,
     type Node,
+    NodeType,
 } from "../types.js";
 
 /**
@@ -81,8 +81,11 @@ function transformNodes(
 ): Node[] {
     const result: Node[] = [];
 
-    for (const [idx, node_] of nodes.entries()) {
-        const node = node_!;
+    for (let idx = 0; idx < nodes.length; idx++) {
+        const node = nodes[idx];
+        if (!node) {
+            continue;
+        }
         const context: TransformContext = {
             parent: ancestors.at(-1),
             index: idx,
@@ -102,8 +105,6 @@ function transformNodes(
         const transformed = transformer.transform(transformedNode, context);
 
         if (transformed === null) {
-            // Node removed
-            continue;
         } else if (Array.isArray(transformed)) {
             // Node replaced with multiple nodes
             result.push(...transformed);
@@ -200,13 +201,17 @@ export function composeTransformers(
                 if (Array.isArray(result)) {
                     // Apply transformer to each node in array
                     const newResult: Node[] = [];
-                    for (const [idx, element] of result.entries()) {
-                        const transformed = transformer.transform(element!, {
+                    for (let idx = 0; idx < result.length; idx++) {
+                        const element = result[idx];
+                        if (!element) {
+                            continue;
+                        }
+
+                        const transformed = transformer.transform(element, {
                             ...context,
                             index: idx,
                         });
                         if (transformed === null) {
-                            continue;
                         } else if (Array.isArray(transformed)) {
                             newResult.push(...transformed);
                         } else {

@@ -1,15 +1,15 @@
 import {
-    TokenType,
+    type ArgumentNode,
+    type LexerOptions,
+    type Node,
     NodeType,
+    type ParseResult,
+    type ParserOptions,
     type ReadonlyToken,
     type TokenGenerator,
-    type ArgumentNode,
-    type Node,
-    type ParserOptions,
-    type LexerOptions,
-    type ParseResult,
+    TokenType,
 } from "../../types.js";
-import { TagParseError, StrictModeError, type Position } from "../Errors.js";
+import { type Position, StrictModeError, TagParseError } from "../Errors.js";
 import { Lexer } from "../Lexer.js";
 import { FunctionTagParser } from "./TagParsers/FunctionTagParser.js";
 import { VariableTagParser } from "./TagParsers/VariableTagParser.js";
@@ -172,9 +172,19 @@ export class Parser {
                     return { type: NodeType.Text, value: "" };
                 }
 
-                return this.evaluateTags
-                    ? this.variableParser!.parse(name)
-                    : { type: NodeType.Variable, raw: name };
+                if (!this.evaluateTags) {
+                    return { type: NodeType.Variable, raw: name };
+                }
+
+                const variableParser = this.variableParser;
+                if (!variableParser) {
+                    throw new TagParseError(
+                        "Variable parser is not configured while evaluateTags is enabled",
+                        nextToken.position,
+                    );
+                }
+
+                return variableParser.parse(name);
             }
 
             case TokenType.Colon: {
@@ -193,9 +203,19 @@ export class Parser {
                     );
                 }
 
-                return this.evaluateTags
-                    ? this.functionParser!.parse(name, args)
-                    : { type: NodeType.Function, name, args };
+                if (!this.evaluateTags) {
+                    return { type: NodeType.Function, name, args };
+                }
+
+                const functionParser = this.functionParser;
+                if (!functionParser) {
+                    throw new TagParseError(
+                        "Function parser is not configured while evaluateTags is enabled",
+                        nextToken.position,
+                    );
+                }
+
+                return functionParser.parse(name, args);
             }
 
             default: {

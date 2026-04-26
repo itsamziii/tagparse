@@ -1,4 +1,4 @@
-import { Parser, walk, transform, createVariableResolver } from "tagparse";
+import { createVariableResolver, Parser, transform, walk } from "tagparse";
 
 // Basic parsing
 const parser = new Parser();

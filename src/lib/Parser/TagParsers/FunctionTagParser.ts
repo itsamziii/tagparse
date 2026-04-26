@@ -1,7 +1,7 @@
 import {
+    type ArgumentNode,
     type FunctionNode,
     NodeType,
-    type ArgumentNode,
     type TFunctionParserFn,
 } from "../../../types.js";
 import { TagParser } from "./TagParser.js";

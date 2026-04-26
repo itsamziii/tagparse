@@ -1,17 +1,17 @@
 import {
-    TokenType,
-    NodeType,
-    type ReadonlyToken,
-    type TokenGenerator,
     type ArgumentNode,
-    type ParserAsyncOptions,
     type LexerOptions,
-    type TFunctionParserAsyncFn,
-    type TVariableParserAsyncFn,
-    type ParseResult,
     type Node,
+    NodeType,
+    type ParseResult,
+    type ParserAsyncOptions,
+    type ReadonlyToken,
+    type TFunctionParserAsyncFn,
+    type TokenGenerator,
+    TokenType,
+    type TVariableParserAsyncFn,
 } from "../../types.js";
-import { TagParseError, StrictModeError, type Position } from "../Errors.js";
+import { type Position, StrictModeError, TagParseError } from "../Errors.js";
 import { Lexer } from "../Lexer.js";
 
 type ParsedArgument = {
