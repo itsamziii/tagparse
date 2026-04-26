@@ -24,7 +24,7 @@
         "dev": "vitest",
         "ci": "pnpm run lint && pnpm run test",
         "changeset:version": "changeset version",
-        "changeset:publish": "pnpm run build && changeset publish"
+        "changeset:publish": "pnpm run build && changeset publish --tag next"
     },
     "keywords": [
         "parser",
