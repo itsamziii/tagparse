@@ -18,11 +18,13 @@
     },
     "scripts": {
         "build": "tsup",
-        "lint": "eslint .",
-        "format": "prettier --write .",
         "test": "vitest run",
         "dev": "vitest",
-        "ci": "pnpm run lint && pnpm run test",
+        "lint": "biome lint .",
+        "format": "biome format --write .",
+        "check": "biome check --write .",
+        "typecheck": "tsc --noEmit",
+        "ci": "pnpm run typecheck && biome ci . && pnpm run test",
         "changeset:version": "changeset version",
         "changeset:publish": "pnpm run build && changeset publish --tag next"
     },
@@ -40,11 +42,9 @@
     "author": "ItsAmziii",
     "license": "MIT",
     "devDependencies": {
+        "@biomejs/biome": "^2.4.13",
         "@changesets/cli": "^2.27.9",
         "@types/node": "^22.8.2",
-        "eslint": "9.39.2",
-        "eslint-config-neon": "^0.2.9",
-        "prettier": "^3.3.3",
         "tsup": "^8.3.5",
         "typescript": "^5.6.3",
         "vitest": "^2.1.4"
@@ -54,5 +54,5 @@
         "url": "git+https://github.com/itsamziii/tagparse.git"
     },
     "homepage": "https://github.com/itsamziii/tagparse#readme",
-    "packageManager": "pnpm@10.26.2+sha512.0e308ff2005fc7410366f154f625f6631ab2b16b1d2e70238444dd6ae9d630a8482d92a451144debc492416896ed16f7b114a86ec68b8404b2443869e68ffda6"
+    "packageManager": "pnpm@10.26.2"
 }
