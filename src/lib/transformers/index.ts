@@ -1,4 +1,4 @@
-import { NodeType, type Node, type TextNode } from "../../types.js";
+import { type Node, NodeType, type TextNode } from "../../types.js";
 import { createTransformer, type Transformer } from "../Transformer.js";
 
 /**

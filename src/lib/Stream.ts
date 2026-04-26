@@ -37,7 +37,14 @@ export class Stream {
     private started: boolean = false;
 
     public constructor(str: string) {
-        this.buffer = Array.from(str, (char) => char.codePointAt(0)!);
+        this.buffer = Array.from(str, (char) => {
+            const codePoint = char.codePointAt(0);
+            if (codePoint === undefined) {
+                throw new Error("Invalid character in input stream");
+            }
+
+            return codePoint;
+        });
     }
 
     /**
@@ -83,7 +90,13 @@ export class Stream {
         }
 
         this.started = true;
-        this.currentCodePoint = this.buffer.shift()!;
+        const nextCodePoint = this.buffer.shift();
+        if (nextCodePoint === undefined) {
+            this.currentCodePoint = -1;
+            return false;
+        }
+
+        this.currentCodePoint = nextCodePoint;
         return true;
     }
 

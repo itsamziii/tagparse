@@ -1,8 +1,8 @@
 import {
-    TokenType,
     type LexerOptions,
     type Token,
     type TokenGenerator,
+    TokenType,
 } from "../types.js";
 import { getCharPoint } from "../utils.js";
 import type { Position } from "./Errors.js";

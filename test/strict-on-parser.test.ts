@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { Parser, NodeType } from "../src/index.js";
+import { describe, expect, it } from "vitest";
+import { NodeType, Parser } from "../src/index.js";
 
 const globalParser = new Parser({ strict: true });
 
