@@ -1,17 +1,81 @@
-// Core types
+export {
+    type AnyTagHandler,
+    defineStructuralTag,
+    isStructural,
+    type RenderOptions,
+    render,
+    type StructuralTagHandler,
+    stringify,
+    withLocals,
+} from "./lib/compiler/Render.js";
+export {
+    type AnyAsyncTagHandler,
+    type AsyncStructuralTagHandler,
+    type RenderAsyncOptions,
+    renderAsync,
+} from "./lib/compiler/RenderAsync.js";
+export { Template } from "./lib/compiler/Template.js";
+export {
+    AggregateParseError,
+    MaxDepthError,
+    RenderError,
+    StrictModeError,
+    TagParseError,
+} from "./lib/errors/Errors.js";
+export { Lexer } from "./lib/lexer/Lexer.js";
+export { Stream } from "./lib/lexer/Stream.js";
+export { parse } from "./lib/parser/Parser.js";
+export { pathResolver } from "./lib/resolvers/pathResolver.js";
+export {
+    builtinTags,
+    defaultTag,
+    eachTag,
+    eqTag,
+    gtTag,
+    ifTag,
+    isTruthy,
+    lengthTag,
+    lowerTag,
+    ltTag,
+    neTag,
+    notTag,
+    replaceTag,
+    trimTag,
+    unlessTag,
+    upperTag,
+} from "./lib/tags/builtins.js";
 
-export * from "./lib/Errors.js";
-// Lexer
-export * from "./lib/Lexer.js";
-// Parser
-export * from "./lib/Parser/Parser.js";
-export * from "./lib/Parser/ParserAsync.js";
-// Utilities
-export * from "./lib/Stream.js";
-// AST utilities
-export * from "./lib/Transformer.js";
-// Built-in transformers
-export * from "./lib/transformers/index.js";
-export * from "./lib/Visitor.js";
-export * from "./types.js";
-export * from "./utils.js";
+export {
+    collectTagNames,
+    collectVariableNames,
+    findNodes,
+    type VisitContext,
+    type Visitor,
+    walk,
+} from "./lib/visitor/Visitor.js";
+export type {
+    ArgumentNode,
+    AsyncTagHandler,
+    AsyncVariableResolver,
+    CompiledTemplate,
+    LexerOptions,
+    NodeKind,
+    ParseDiagnostic,
+    ParseResult,
+    ParserOptions,
+    Position,
+    RenderContext,
+    Span,
+    TagHandler,
+    TagNode,
+    TemplateNode,
+    TextNode,
+    Token,
+    TokenKind,
+    VariableNode,
+    VariableResolver,
+} from "./types.js";
+export {
+    NodeKind as NodeKindValues,
+    TokenKind as TokenKindValues,
+} from "./types.js";

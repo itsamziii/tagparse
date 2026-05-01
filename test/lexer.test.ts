@@ -1,285 +1,130 @@
 import { describe, expect, it } from "vitest";
-import { Lexer, TokenType } from "../src/index.js";
+import { Lexer } from "../src/lib/lexer/Lexer.js";
 
-// Helper to strip position from tokens for easier comparison
-function stripPositions(
-    tokens: { position?: unknown; type: string; value: string }[],
-) {
-    return tokens.map(({ type, value }) => ({ type, value }));
+function kinds(
+    input: string,
+    opts?: ConstructorParameters<typeof Lexer>[1],
+): string[] {
+    return [...new Lexer(input, opts)].map(
+        (t) => `${t.kind}:${JSON.stringify(t.value)}`,
+    );
 }
 
 describe("Lexer", () => {
-    // Edge cases: empty and whitespace-only input
-    it("should return no tokens for empty input", () => {
-        const lexer = new Lexer("");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([]);
+    it("tokenizes plain text", () => {
+        expect(kinds("hello world")).toEqual(['Text:"hello world"', 'EOF:""']);
     });
 
-    it("should tokenize whitespace-only input as literal", () => {
-        const lexer = new Lexer("   ");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.Space, value: " " },
+    it("tokenizes a simple tag", () => {
+        expect(kinds("hi {name}!")).toEqual([
+            'Text:"hi "',
+            'TagStart:"{"',
+            'Text:"name"',
+            'TagEnd:"}"',
+            'Text:"!"',
+            'EOF:""',
         ]);
     });
 
-    it("should tokenize plain text without any tags", () => {
-        const lexer = new Lexer("hello world");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.Literal, value: "hello" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.Literal, value: "world" },
+    it("tokenizes function tag with pipes", () => {
+        expect(kinds("{f:a|b}")).toEqual([
+            'TagStart:"{"',
+            'Text:"f"',
+            'Colon:":"',
+            'Text:"a"',
+            'Pipe:"|"',
+            'Text:"b"',
+            'TagEnd:"}"',
+            'EOF:""',
         ]);
     });
 
-    it("should tokenize text before and after a tag", () => {
-        const lexer = new Lexer("prefix {tag} suffix");
-        const tokens = [...lexer];
+    it("supports multi-character delimiters", () => {
+        expect(kinds("hi {{name}}!", { tagStart: "{{", tagEnd: "}}" })).toEqual(
+            [
+                'Text:"hi "',
+                'TagStart:"{{"',
+                'Text:"name"',
+                'TagEnd:"}}"',
+                'Text:"!"',
+                'EOF:""',
+            ],
+        );
+    });
 
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.Literal, value: "prefix" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.TagEnd, value: "}" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.Literal, value: "suffix" },
+    it("does NOT emit stray TagEnd outside a tag (the v1 bug)", () => {
+        // Single } in plain text should be text, not a TagEnd token
+        const tokens = kinds("a } b");
+        expect(tokens).toEqual(['Text:"a } b"', 'EOF:""']);
+    });
+
+    it("does NOT emit unbalanced }} for multi-char delims", () => {
+        // The v1 lexer emitted TagEnd("}}") here even with no matching TagStart.
+        const tokens = kinds("a }} b", { tagStart: "{{", tagEnd: "}}" });
+        expect(tokens).toEqual(['Text:"a }} b"', 'EOF:""']);
+    });
+
+    it("treats a single { as text when delimiter is {{", () => {
+        expect(kinds("a { b }} c", { tagStart: "{{", tagEnd: "}}" })).toEqual([
+            'Text:"a { b }} c"',
+            'EOF:""',
         ]);
     });
 
-    // Multiple special characters
-    it("should tokenize multiple colons in a row", () => {
-        const lexer = new Lexer("{tag::value}");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Literal, value: "value" },
-            { type: TokenType.TagEnd, value: "}" },
+    it("escape character suppresses the next delimiter", () => {
+        expect(kinds("hi \\{name\\}")).toEqual([
+            'Text:"hi "',
+            'Text:"{"',
+            'Text:"name"',
+            'Text:"}"',
+            'EOF:""',
         ]);
     });
 
-    it("should tokenize multiple pipes in a row", () => {
-        const lexer = new Lexer("{tag:a||b}");
-        const tokens = [...lexer];
+    it("escape character before non-delimiter passes through", () => {
+        // \\n becomes literal n. Common pattern: escape "\\" with "\\\\".
+        expect(kinds("\\n")).toEqual(['Text:"n"', 'EOF:""']);
+    });
 
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Literal, value: "a" },
-            { type: TokenType.Pipe, value: "|" },
-            { type: TokenType.Pipe, value: "|" },
-            { type: TokenType.Literal, value: "b" },
-            { type: TokenType.TagEnd, value: "}" },
+    it("trailing escape becomes literal", () => {
+        expect(kinds("hello\\")).toEqual([
+            'Text:"hello"',
+            'Text:"\\\\"',
+            'EOF:""',
         ]);
     });
 
-    it("should tokenize mixed special characters", () => {
-        const lexer = new Lexer("{a:b|c:d|e}");
-        const tokens = [...lexer];
+    it("preserves Unicode (emoji) in spans", () => {
+        const tokens = [...new Lexer("👋 {emoji}")];
+        const text = tokens[0];
+        expect(text).toBeDefined();
+        if (!text) throw new Error();
+        expect(text.value).toBe("👋 ");
+        // Emoji is one code point — column should advance by 1
+        const tagStart = tokens[1];
+        expect(tagStart).toBeDefined();
+        if (!tagStart) throw new Error();
+        expect(tagStart.span.start.column).toBe(3);
+    });
 
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "a" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Literal, value: "b" },
-            { type: TokenType.Pipe, value: "|" },
-            { type: TokenType.Literal, value: "c" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Literal, value: "d" },
-            { type: TokenType.Pipe, value: "|" },
-            { type: TokenType.Literal, value: "e" },
-            { type: TokenType.TagEnd, value: "}" },
+    it("colons and pipes outside tags are text", () => {
+        expect(kinds("http://x.com|y")).toEqual([
+            'Text:"http://x.com|y"',
+            'EOF:""',
         ]);
     });
 
-    // Unclosed/unterminated tags
-    it("should tokenize unclosed tag start", () => {
-        const lexer = new Lexer("{tag");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-        ]);
+    it("handles nested tags", () => {
+        const tokens = kinds("{outer:{inner}}");
+        expect(tokens).toContain('TagStart:"{"');
+        // Should see two TagStart, two TagEnd
+        expect(tokens.filter((t) => t.startsWith("TagStart")).length).toBe(2);
+        expect(tokens.filter((t) => t.startsWith("TagEnd")).length).toBe(2);
     });
 
-    it("should tokenize orphan tag end", () => {
-        const lexer = new Lexer("tag}");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    it("should tokenize multiple unclosed tags", () => {
-        const lexer = new Lexer("{a {b {c");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "a" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "b" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "c" },
-        ]);
-    });
-
-    // Special characters in literals
-    it("should tokenize backslash as part of literal", () => {
-        const lexer = new Lexer("{tag\\:value}");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag\\" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Literal, value: "value" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    it("should tokenize numbers and special chars in literal", () => {
-        const lexer = new Lexer("{tag123_test-value}");
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag123_test-value" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    // Original tests
-    it("should tokenize a simple tag", () => {
-        const input = "{tag}";
-        const lexer = new Lexer(input);
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    it("should tokenize nested tags", () => {
-        const input = "{outer{inner}}";
-        const lexer = new Lexer(input);
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "outer" },
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "inner" },
-            { type: TokenType.TagEnd, value: "}" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    it("should tokenize tags with arguments", () => {
-        const input = "{tag:arg1|arg2}";
-        const lexer = new Lexer(input);
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.Colon, value: ":" },
-            { type: TokenType.Literal, value: "arg1" },
-            { type: TokenType.Pipe, value: "|" },
-            { type: TokenType.Literal, value: "arg2" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    it("should handle custom tag delimiters", () => {
-        const input = "$(tag)";
-        const lexer = new Lexer(input, { tagStart: "$(", tagEnd: ")" });
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "$(" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.TagEnd, value: ")" },
-        ]);
-    });
-
-    it("should handle multi-byte (emoji) tag delimiters", () => {
-        const input = "🧪<नाम🔚>";
-        const lexer = new Lexer(input, { tagStart: "🧪<", tagEnd: "🔚>" });
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "🧪<" },
-            { type: TokenType.Literal, value: "नाम" },
-            { type: TokenType.TagEnd, value: "🔚>" },
-        ]);
-    });
-
-    it("should handle spaces within tags", () => {
-        const input = "{tag with spaces}";
-        const lexer = new Lexer(input);
-        const tokens = [...lexer];
-
-        expect(stripPositions(tokens)).toEqual([
-            { type: TokenType.TagStart, value: "{" },
-            { type: TokenType.Literal, value: "tag" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.Literal, value: "with" },
-            { type: TokenType.Space, value: " " },
-            { type: TokenType.Literal, value: "spaces" },
-            { type: TokenType.TagEnd, value: "}" },
-        ]);
-    });
-
-    // Position tracking tests
-    it("should track positions correctly", () => {
-        const lexer = new Lexer("{a}");
-        const tokens = [...lexer];
-        const [first, second, third] = tokens;
-
-        expect(first).toBeDefined();
-        expect(second).toBeDefined();
-        expect(third).toBeDefined();
-        if (!first || !second || !third) {
-            throw new Error("Expected three tokens for input {a}");
-        }
-
-        expect(first.position).toEqual({ line: 1, column: 1, offset: 0 });
-        expect(second.position).toEqual({ line: 1, column: 2, offset: 1 });
-        expect(third.position).toEqual({ line: 1, column: 3, offset: 2 });
-    });
-
-    it("should track line numbers across newlines", () => {
-        const lexer = new Lexer("a\n{b}");
-        const tokens = [...lexer];
-        const [first, second] = tokens;
-
-        expect(first).toBeDefined();
-        expect(second).toBeDefined();
-        if (!first || !second) {
-            throw new Error("Expected two tokens for input a\\n{b}");
-        }
-
-        expect(first.position?.line).toBe(1);
-        expect(second.position?.line).toBe(2);
+    it("custom delimiters: <%= %> work", () => {
+        expect(kinds("<%= name %>", { tagStart: "<%=", tagEnd: "%>" })).toEqual(
+            ['TagStart:"<%="', 'Text:" name "', 'TagEnd:"%>"', 'EOF:""'],
+        );
     });
 });
