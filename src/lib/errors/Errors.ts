@@ -86,7 +86,11 @@ export class AggregateParseError extends TagParseError {
                   ...(first.hint !== undefined ? { hint: first.hint } : {}),
               }
             : undefined;
-        super(first ? first.message : "Parse failed", opts);
+        const message =
+            diagnostics.length > 1
+                ? `Parse failed (${diagnostics.length} errors): ${first?.message ?? ""}`
+                : (first?.message ?? "Parse failed");
+        super(message, opts);
         this.name = "AggregateParseError";
         this.diagnostics = diagnostics;
     }

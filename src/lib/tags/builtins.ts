@@ -9,7 +9,7 @@ import {
  * Empty string, "0", "false", "null", "undefined", "no" are falsy. Anything else is truthy.
  */
 export function isTruthy(value: string): boolean {
-    if (typeof value !== "string" || value.length === 0) return false;
+    if (value.length === 0) return false;
     const lower = value.trim().toLowerCase();
     return (
         lower !== "0" &&
@@ -76,7 +76,8 @@ export const unlessTag: StructuralTagHandler = defineStructuralTag(
 /**
  * {each:list|template|separator?}
  *
- * list: comma-separated string. The template re-renders for each item with locals:
+ * list: comma-separated string — items cannot contain commas (no escape mechanism).
+ * The template re-renders for each item with locals:
  *   {it} = item, {idx} = 0-based index, {idx1} = 1-based, {first}, {last}.
  */
 export const eachTag: StructuralTagHandler = defineStructuralTag(
@@ -87,14 +88,17 @@ export const eachTag: StructuralTagHandler = defineStructuralTag(
         if (!listExpr || !itemExpr) return "";
 
         const renderList = render(listExpr) as Awaitable<string>;
-        const renderSep = args[2] ? (render(args[2]) as Awaitable<string>) : "";
 
-        return maybeAwait(renderList, (list) =>
-            maybeAwait(renderSep, (sep) => {
-                const items =
-                    list.length === 0
-                        ? []
-                        : list.split(",").map((s) => s.trim());
+        return maybeAwait(renderList, (list) => {
+            const items =
+                list.length === 0 ? [] : list.split(",").map((s) => s.trim());
+            if (items.length === 0) return "";
+
+            const renderSep = args[2]
+                ? (render(args[2]) as Awaitable<string>)
+                : "";
+
+            return maybeAwait(renderSep, (sep) => {
                 const out: Awaitable<string>[] = [];
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
@@ -120,8 +124,8 @@ export const eachTag: StructuralTagHandler = defineStructuralTag(
                     return Promise.all(out).then((parts) => parts.join(sep));
                 }
                 return (out as string[]).join(sep);
-            }),
-        ) as string;
+            });
+        }) as string;
     },
 );
 
@@ -160,6 +164,22 @@ export const ltTag: TagHandler = (args) => {
     return a < b ? "true" : "";
 };
 
+export const gteTag: TagHandler = (args) => {
+    if (args.length !== 2) return "";
+    const a = Number(args[0]);
+    const b = Number(args[1]);
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return "";
+    return a >= b ? "true" : "";
+};
+
+export const lteTag: TagHandler = (args) => {
+    if (args.length !== 2) return "";
+    const a = Number(args[0]);
+    const b = Number(args[1]);
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return "";
+    return a <= b ? "true" : "";
+};
+
 /**
  * {not:value} — flip truthiness; "true" if falsy, "" otherwise.
  */
@@ -196,6 +216,8 @@ export const builtinTags = {
     ne: neTag,
     gt: gtTag,
     lt: ltTag,
+    gte: gteTag,
+    lte: lteTag,
     not: notTag,
     upper: upperTag,
     lower: lowerTag,

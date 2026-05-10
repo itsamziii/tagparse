@@ -10,7 +10,7 @@ import type {
 import { type Awaitable, NodeKind } from "../../types.js";
 import { RenderError } from "../errors/Errors.js";
 
-const MAX_RENDER_DEPTH = 64;
+export const MAX_RENDER_DEPTH = 64;
 
 /**
  * Structural tag handler — receives the raw argument AST nodes plus a
@@ -232,7 +232,7 @@ function renderArg<Ctx>(
  *   - Functions that take arguments are returned as undefined to avoid
  *     accidentally invoking object methods like toString or hasOwnProperty.
  */
-function normalizeResolver<Ctx>(
+export function normalizeResolver<Ctx>(
     v: VariableResolver<Ctx> | Record<string, unknown> | undefined,
 ): VariableResolver<Ctx> | undefined {
     if (!v) return undefined;

@@ -42,7 +42,7 @@ export function pathResolver<Ctx = unknown>(
 function walkPath(
     root: unknown,
     path: string,
-): string | number | boolean | null | undefined {
+): string | number | boolean | object | null | undefined {
     if (path.length === 0) return undefined;
 
     const segments = path.split(".");
@@ -105,5 +105,5 @@ function walkPath(
     if (t === "bigint") return (current as bigint).toString();
 
     // Defer object stringification to the renderer's stringify().
-    return current as never;
+    return current as object;
 }

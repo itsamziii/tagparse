@@ -14,12 +14,12 @@ import { RenderError } from "../errors/Errors.js";
 import {
     type AnyTagHandler,
     isStructural,
+    MAX_RENDER_DEPTH,
+    normalizeResolver,
     type StructuralTagHandler,
     stringify,
     withLocals,
 } from "./Render.js";
-
-const MAX_RENDER_DEPTH = 64;
 
 export interface AsyncStructuralTagHandler<Ctx = unknown> {
     readonly structural: true;
@@ -38,16 +38,6 @@ export type AnyAsyncTagHandler<Ctx = unknown> =
     | AsyncStructuralTagHandler<Ctx>
     | StructuralTagHandler<Ctx>
     | TagHandler<Ctx>;
-
-function isAsyncStructural<Ctx>(
-    h: AnyAsyncTagHandler<Ctx>,
-): h is AsyncStructuralTagHandler<Ctx> {
-    return (
-        typeof h === "object" &&
-        h !== null &&
-        (h as AsyncStructuralTagHandler<Ctx>).structural === true
-    );
-}
 
 export interface RenderAsyncOptions<Ctx = unknown> {
     readonly data?: Ctx;
@@ -74,7 +64,12 @@ export async function renderAsync<Ctx = unknown>(
     options: RenderAsyncOptions<Ctx> = {},
 ): Promise<string> {
     const data = (options.data ?? ({} as Ctx)) as Ctx;
-    const resolver = normalizeResolverAsync(options.variables);
+    const resolver = normalizeResolver(
+        options.variables as
+            | VariableResolver<Ctx>
+            | Record<string, unknown>
+            | undefined,
+    ) as AsyncVariableResolver<Ctx> | undefined;
     const tags = options.tags ?? {};
     const ctx: RenderContext<Ctx> = { data, locals: new Map(), depth: 0 };
     return renderNodesAsync(template.nodes, ctx, resolver, tags, options);
@@ -148,10 +143,7 @@ async function renderTagAsync<Ctx>(
     }
 
     try {
-        if (
-            isAsyncStructural(handler) ||
-            isStructural(handler as AnyTagHandler<Ctx>)
-        ) {
+        if (isStructural(handler as AnyTagHandler<Ctx>)) {
             const renderArgFn = async (
                 arg: ArgumentNode,
                 locals?: Record<string, unknown>,
@@ -167,9 +159,11 @@ async function renderTagAsync<Ctx>(
                     options,
                 );
             };
-            const result = await (
-                handler as AsyncStructuralTagHandler<Ctx>
-            ).handle(node.args, ctx, renderArgFn);
+            const result = await (handler as StructuralTagHandler<Ctx>).handle(
+                node.args,
+                ctx,
+                renderArgFn,
+            );
             return stringify(result);
         }
 
@@ -209,38 +203,4 @@ async function renderArgAsync<Ctx>(
         tags,
         options,
     );
-}
-
-/**
- * Normalize an async resolver. Mirrors normalizeResolver in Render.ts:
- * own props only, zero-arg function auto-invocation, args-taking functions
- * skipped to avoid accidental method calls.
- */
-function normalizeResolverAsync<Ctx>(
-    v:
-        | AsyncVariableResolver<Ctx>
-        | VariableResolver<Ctx>
-        | Record<string, unknown>
-        | undefined,
-): AsyncVariableResolver<Ctx> | undefined {
-    if (!v) return undefined;
-    if (typeof v === "function") return v as AsyncVariableResolver<Ctx>;
-    return (name: string) => {
-        if (!Object.hasOwn(v, name)) return undefined;
-        const value = v[name];
-        if (value === undefined) return undefined;
-        if (typeof value === "function") {
-            if ((value as (...a: unknown[]) => unknown).length === 0) {
-                try {
-                    return (value as () => unknown)() as ReturnType<
-                        AsyncVariableResolver<Ctx>
-                    >;
-                } catch {
-                    return undefined;
-                }
-            }
-            return undefined;
-        }
-        return value as ReturnType<AsyncVariableResolver<Ctx>>;
-    };
 }
