@@ -1,25 +1,42 @@
 {
     "name": "tagparse",
-    "description": "A way to parse tags.",
-    "version": "1.0.1",
-    "private": false,
+    "description": "AST-first templating library for Discord and chat bots. Parse {variable}, {if:cond|then|else}, {each:items|template} placeholder syntax with safe rendering helpers.",
+    "version": "2.0.0",
     "main": "./dist/cjs/index.cjs",
     "module": "./dist/esm/index.mjs",
-    "types": "./dist/cjs/index.d.ts",
+    "types": "./dist/esm/index.d.mts",
     "exports": {
-        "import": {
-            "types": "./dist/esm/index.d.mts",
-            "default": "./dist/esm/index.mjs"
+        ".": {
+            "import": {
+                "types": "./dist/esm/index.d.mts",
+                "default": "./dist/esm/index.mjs"
+            },
+            "require": {
+                "types": "./dist/cjs/index.d.ts",
+                "default": "./dist/cjs/index.cjs"
+            }
         },
-        "require": {
-            "types": "./dist/cjs/index.d.ts",
-            "default": "./dist/cjs/index.cjs"
+        "./discord": {
+            "import": {
+                "types": "./dist/esm/discord.d.mts",
+                "default": "./dist/esm/discord.mjs"
+            },
+            "require": {
+                "types": "./dist/cjs/discord.d.ts",
+                "default": "./dist/cjs/discord.cjs"
+            }
         }
     },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
     "scripts": {
         "build": "tsup",
         "test": "vitest run",
-        "dev": "vitest",
+        "test:watch": "vitest",
+        "bench": "node --import tsx test/bench.ts",
         "lint": "biome lint .",
         "format": "biome format --write .",
         "check": "biome check --write .",
@@ -29,30 +46,49 @@
         "changeset:publish": "pnpm run build && changeset publish --tag next"
     },
     "keywords": [
-        "parser",
-        "tags",
-        "templating",
-        "tag-parser",
+        "discord",
+        "discord-bot",
+        "discord-template",
+        "discord-templating",
+        "chat-bot",
         "template-engine",
-        "tokenizer",
+        "templating",
+        "placeholder",
+        "string-interpolation",
+        "tag-parser",
+        "parser",
+        "ast",
         "lexer",
-        "string-parser",
-        "comment-parser"
+        "tokenizer",
+        "mustache-alternative",
+        "string-template",
+        "message-template",
+        "embed-template",
+        "typescript",
+        "esm",
+        "cjs",
+        "ikigai"
     ],
+    "packageManager": "pnpm@10.33.2",
     "author": "ItsAmziii",
     "license": "MIT",
+    "engines": {
+        "node": ">=18.0.0"
+    },
     "devDependencies": {
         "@biomejs/biome": "^2.4.13",
-        "@changesets/cli": "^2.27.9",
-        "@types/node": "^22.8.2",
-        "tsup": "^8.3.5",
-        "typescript": "^5.6.3",
-        "vitest": "^2.1.4"
+        "@changesets/cli": "^2.31.0",
+        "@types/node": "^22.19.17",
+        "tsup": "^8.5.1",
+        "typescript": "^5.9.3",
+        "vitest": "^2.1.9"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/itsamziii/tagparse.git"
     },
     "homepage": "https://github.com/itsamziii/tagparse#readme",
-    "packageManager": "pnpm@10.26.2"
+    "bugs": {
+        "url": "https://github.com/itsamziii/tagparse/issues"
+    }
 }
