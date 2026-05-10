@@ -43,7 +43,7 @@
         "typecheck": "tsc --noEmit",
         "ci": "pnpm run typecheck && biome ci . && pnpm run test",
         "changeset:version": "changeset version",
-        "changeset:publish": "pnpm run build && changeset publish --tag next"
+        "changeset:publish": "pnpm run build && changeset publish"
     },
     "keywords": [
         "discord",
