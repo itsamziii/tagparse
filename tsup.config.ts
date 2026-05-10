@@ -1,30 +1,26 @@
-import { relative, resolve } from "node:path";
-import process from "node:process";
-import { defineConfig, type Options } from "tsup";
+import { defineConfig } from "tsup";
 
-const baseOptions: Options = {
-    dts: true,
-    shims: true,
-    skipNodeModulesBundle: true,
-    clean: true,
-    sourcemap: true,
-    entry: ["./src/index.ts"],
-    target: "es2022",
-    minify: false,
-    tsconfig: relative(__dirname, resolve(process.cwd(), "tsconfig.json")),
-    keepNames: true,
-};
-
-export default [
-    defineConfig({
-        ...baseOptions,
-        format: "esm",
+export default defineConfig([
+    {
+        entry: ["src/index.ts", "src/discord.ts"],
+        format: ["esm"],
         outDir: "dist/esm",
-    }),
-    defineConfig({
-        ...baseOptions,
-        format: "cjs",
+        outExtension: () => ({ js: ".mjs", dts: ".d.mts" }),
+        dts: true,
+        sourcemap: true,
+        clean: true,
+        treeshake: true,
+        target: "es2022",
+    },
+    {
+        entry: ["src/index.ts", "src/discord.ts"],
+        format: ["cjs"],
         outDir: "dist/cjs",
-        outExtension: () => ({ js: ".cjs" }),
-    }),
-];
+        outExtension: () => ({ js: ".cjs", dts: ".d.ts" }),
+        dts: true,
+        sourcemap: true,
+        clean: false,
+        treeshake: true,
+        target: "es2022",
+    },
+]);

@@ -1,17 +1,23 @@
 {
     "compilerOptions": {
-        "target": "ESNext",
+        "target": "ES2022",
         "module": "NodeNext",
-        "moduleResolution": "nodenext",
-        "outDir": "dist/",
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "NodeNext",
         "strict": true,
+        "esModuleInterop": true,
         "skipLibCheck": true,
-        "noImplicitAny": true,
-        "isolatedModules": true,
+        "forceConsistentCasingInFileNames": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
         "noUncheckedIndexedAccess": true,
-        "noEmit": true
+        "exactOptionalPropertyTypes": true,
+        "noImplicitOverride": true,
+        "useUnknownInCatchVariables": true,
+        "outDir": "dist",
+        "rootDir": "src",
+        "lib": ["ES2022"]
     },
-    "exclude": ["dist", "node_modules", "*.{js,mjs}", "**.test.**"]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist", "test"]
 }
