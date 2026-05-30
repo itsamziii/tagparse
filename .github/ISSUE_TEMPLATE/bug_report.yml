@@ -1,0 +1,54 @@
+name: Bug report
+description: Report incorrect behavior in tagparse
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A minimal reproduction is the fastest path to a fix.
+  - type: input
+    id: version
+    attributes:
+      label: tagparse version
+      placeholder: "2.0.1"
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "20.11.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: The template source and the data/options passed to render.
+      render: ts
+      placeholder: |
+        const tpl = Template.compile("{each:{items}|<{it}>}");
+        tpl.render({ variables: { items: ["a", "b"] }, tags: builtinTags });
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues for a duplicate.
+          required: true
+        - label: I'm on a supported version (2.x).
+          required: true

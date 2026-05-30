@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & discussions
+    url: https://github.com/itsamziii/tagparse/discussions
+    about: Ask usage questions and discuss ideas here, not in the issue tracker.
+  - name: Security vulnerability
+    url: https://github.com/itsamziii/tagparse/security/advisories/new
+    about: Report security issues privately — please don't open a public issue.
