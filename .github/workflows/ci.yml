@@ -43,6 +43,9 @@ jobs:
             - name: Run CI script
               run: pnpm run ci
 
+            - name: Build
+              run: pnpm run build
+
             - name: Coverage
               if: matrix.node == 22
               run: pnpm run test:coverage
