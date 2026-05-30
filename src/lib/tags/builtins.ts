@@ -2,6 +2,7 @@ import type { Awaitable, TagHandler } from "../../types.js";
 import {
     defineStructuralTag,
     type StructuralTagHandler,
+    stringify,
 } from "../compiler/Render.js";
 
 /**
@@ -33,6 +34,32 @@ function maybeAwait<T>(
         return (v as Promise<T>).then(then);
     }
     return then(v as T);
+}
+
+/**
+ * Turn the rendered list argument into items.
+ *
+ * Array variables reach this tag already JSON-stringified by the renderer
+ * (e.g. `["a","b"]`), so a JSON array is parsed back and each element is
+ * stringified with the library's normal rules. Anything else is treated as a
+ * comma-separated string. Comma items are trimmed; JSON string items are used
+ * verbatim.
+ */
+function toItems(list: string): string[] {
+    const trimmed = list.trim();
+    if (
+        trimmed.length >= 2 &&
+        trimmed.charCodeAt(0) === 0x5b /* [ */ &&
+        trimmed.charCodeAt(trimmed.length - 1) === 0x5d /* ] */
+    ) {
+        try {
+            const parsed: unknown = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) return parsed.map((v) => stringify(v));
+        } catch {
+            // Not a JSON array — fall through to comma split.
+        }
+    }
+    return list.length === 0 ? [] : list.split(",").map((s) => s.trim());
 }
 
 /**
@@ -90,8 +117,7 @@ export const eachTag: StructuralTagHandler = defineStructuralTag(
         const renderList = render(listExpr) as Awaitable<string>;
 
         return maybeAwait(renderList, (list) => {
-            const items =
-                list.length === 0 ? [] : list.split(",").map((s) => s.trim());
+            const items = toItems(list);
             if (items.length === 0) return "";
 
             const renderSep = args[2]

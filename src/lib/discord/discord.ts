@@ -169,7 +169,9 @@ export const codeblockTag: TagHandler = (args) => {
     if (args.length === 0 || args.length > 2) return "";
     const [a, b] = args.length === 2 ? args : ["", args[0]];
     const lang = (a ?? "").replace(/[^\w-]/g, "");
-    const safe = (b ?? "").replaceAll("```", "``\u200B`");
+    // Break any run of >=3 backticks; a plain replaceAll("```") leaves 6+
+    // backticks re-forming a valid fence and letting text escape the block.
+    const safe = (b ?? "").replace(/`{3,}/g, (m) => [...m].join("\u200B"));
     return `\`\`\`${lang}\n${safe}\n\`\`\``;
 };
 

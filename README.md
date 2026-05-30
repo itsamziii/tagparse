@@ -305,7 +305,7 @@ Compile-once / render-many: **~500,000 renders/sec** on a typical Discord bot te
 
 ## Migrating from v1
 
-v2 is a complete rewrite. The Parser class is gone; use `Template.compile()` or `parse()`. The `evaluateTags` mode is replaced by registering tag handlers in `render()`. See [MIGRATION.md](./MIGRATION.md) for a full guide.
+v2 is a complete rewrite. The Parser class is gone; use `Template.compile()` or `parse()`. The `evaluateTags` mode is replaced by registering tag handlers in `render()`. See the [CHANGELOG](./CHANGELOG.md) for the full list of changes.
 
 ## Inspired by
 

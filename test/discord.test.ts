@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Template } from "../src/lib/compiler/Template.js";
 import {
+    codeblockTag,
     discordTags,
     escapeDiscord,
     escapeDiscordMarkdown,
@@ -55,6 +56,13 @@ describe("Discord tags", () => {
         expect(tpl.render({ tags: discordTags })).toBe(
             "```js\nconsole.log(1)\n```",
         );
+    });
+
+    it("codeblock neutralizes backtick runs that would escape the fence", () => {
+        // Six backticks must not survive as a fence-closing run inside the body.
+        const out = codeblockTag(["js", "``````\n@everyone"]);
+        const body = out.replace(/^```js\n/, "").replace(/\n```$/, "");
+        expect(body).not.toMatch(/```/);
     });
 
     it("escape tag escapes user input", () => {
