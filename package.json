@@ -1,7 +1,7 @@
 {
     "name": "tagparse",
     "description": "AST-first templating library for Discord and chat bots. Parse {variable}, {if:cond|then|else}, {each:items|template} placeholder syntax with safe rendering helpers.",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "main": "./dist/cjs/index.cjs",
     "module": "./dist/esm/index.mjs",
     "types": "./dist/esm/index.d.mts",
