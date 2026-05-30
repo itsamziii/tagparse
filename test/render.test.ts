@@ -84,6 +84,30 @@ describe("Template.render", () => {
         expect(tpl.render({ tags: builtinTags })).toBe("0a1b0a1b");
     });
 
+    it("each iterates an array variable", () => {
+        const tpl = Template.compile("{each:{items}|<{it}>|,}");
+        expect(
+            tpl.render({
+                variables: { items: ["a", "b", "c"] },
+                tags: builtinTags,
+            }),
+        ).toBe("<a>,<b>,<c>");
+    });
+
+    it("each iterates an array of numbers and exposes idx1", () => {
+        const tpl = Template.compile("{each:{xs}|{idx1}:{it}|;}");
+        expect(
+            tpl.render({ variables: { xs: [10, 20] }, tags: builtinTags }),
+        ).toBe("1:10;2:20");
+    });
+
+    it("each on an empty array renders nothing", () => {
+        const tpl = Template.compile("[{each:{xs}|{it}}]");
+        expect(tpl.render({ variables: { xs: [] }, tags: builtinTags })).toBe(
+            "[]",
+        );
+    });
+
     it("default tag substitutes empty values", () => {
         const tpl = Template.compile("Hi {default:{name}|stranger}!");
         expect(tpl.render({ tags: builtinTags })).toBe("Hi stranger!");
