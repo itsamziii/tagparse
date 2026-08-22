@@ -33,7 +33,7 @@
         "LICENSE"
     ],
     "scripts": {
-        "build": "tsup",
+        "build": "tsdown",
         "test": "vitest run",
         "test:watch": "vitest",
         "test:coverage": "vitest run --coverage",
@@ -85,8 +85,8 @@
         "@changesets/cli": "^3.0.0",
         "@types/node": "^26.1.0",
         "@vitest/coverage-v8": "^2.1.9",
-        "tsup": "^8.5.1",
-        "typescript": "^6.0.3",
+        "tsdown": "^0.22.14",
+        "typescript": "^7.0.2",
         "vitest": "^2.1.9"
     },
     "repository": {

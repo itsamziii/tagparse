@@ -43,7 +43,11 @@ jobs:
             - name: Run CI script
               run: pnpm run ci
 
+            # tsdown (the build tool) requires Node ^22.18.0 || >=24.11.0.
+            # The published output still targets ES2022 and supports Node >=18,
+            # which the test job verifies on every matrix version.
             - name: Build
+              if: matrix.node >= 22
               run: pnpm run build
 
             - name: Coverage

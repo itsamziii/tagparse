@@ -27,7 +27,7 @@ pnpm install
 | `pnpm run typecheck` | `tsc --noEmit` |
 | `pnpm run check` | Biome lint + format, auto-fixing in place |
 | `pnpm run lint` / `pnpm run format` | Lint only / format only |
-| `pnpm run build` | Build ESM + CJS with tsup |
+| `pnpm run build` | Build ESM + CJS with tsdown |
 | `pnpm run bench` | Run the micro-benchmarks |
 | `pnpm run ci` | The full gate: `typecheck && biome ci . && test` |
 
