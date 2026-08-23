@@ -19,3 +19,9 @@ updates:
       github-actions:
         patterns:
           - "*"
+        # Majors get their own PR instead of hiding inside a routine group
+        # bump. Action majors rename inputs without warning -- changesets/action
+        # v1 -> v2 renamed every input and broke Publish on main.
+        update-types:
+          - minor
+          - patch
